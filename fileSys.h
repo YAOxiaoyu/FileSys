@@ -1,5 +1,5 @@
 /*目前各种数据结构 */
-
+#include "virtualDisk.h"
 #include <iostream>
 
 using namespace std;
@@ -24,12 +24,13 @@ using namespace std;
 #define DATASTART (2 + dinodeBLK) * BLOCKSIZ //目录、文件区起始地址
 
 #define iNODESIZE 64      // 目前每个iNODE占64B
-#define ALLBLOCKNUM 10240 // 5M?
+#define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
 /*文件数据结构*/
 struct super_block {
     unsigned short s_isize;       //索引节点块块数
     unsigned long s_fsize;        //数据块块数
+
     unsigned int s_nfree;         //空闲块块数
     unsigned short s_pfree;       //空闲块指针
     unsigned int s_free[NICFREE]; //空闲块堆栈
@@ -117,3 +118,5 @@ extern int user_id, file_block;
 
 // 函数声明
 void format();
+unsigned int balloc(); //磁盘块分配函数
+void bfree(unsigned int block_num);          //磁盘块释放函数

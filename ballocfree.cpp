@@ -10,7 +10,6 @@ void format_sb_freedi() {
     int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
     //一共这么多个空闲数据块
     super_block.s_nfree = free_dblock;
-    
 
     //初始化空闲块
     //从最后一块开始分组
@@ -23,11 +22,10 @@ void format_sb_freedi() {
             super_block.s_free[0] = NICFREE;
             super_block.s_free[1] =
                 DATASTART +
-                (i * NICFREE-1) * BLOCKSIZ; //指向下一个记录空闲块的物理块
+                (i * NICFREE - 1) * BLOCKSIZ; //指向下一个记录空闲块的物理块
         }
         for (int j = 2; j < NICFREE + 1; j++) {
-            super_block.s_free[j] =
-                DATASTART + (i * NICFREE - j) * BLOCKSIZ;
+            super_block.s_free[j] = DATASTART + (i * NICFREE - j) * BLOCKSIZ;
         }
         if (i == 1) {
             //第一个磁盘块

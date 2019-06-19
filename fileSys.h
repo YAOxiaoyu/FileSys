@@ -1,4 +1,9 @@
 /*目前各种数据结构 */
+
+#ifndef FILESYS_H
+#define FILESYS_H
+
+
 #include "virtualDisk.h"
 #include <iostream>
 
@@ -26,8 +31,11 @@ using namespace std;
 #define iNODESIZE 64      // 目前每个iNODE占64B
 #define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
+
 /*文件数据结构*/
 struct super_block {
+
+    
     unsigned short s_isize;       //索引节点块块数
     unsigned long s_fsize;        //数据块块数
 
@@ -120,3 +128,7 @@ extern int user_id, file_block;
 void format();
 unsigned int balloc(); //磁盘块分配函数
 void bfree(unsigned int block_num);          //磁盘块释放函数
+
+
+
+#endif

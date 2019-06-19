@@ -14,3 +14,5 @@ void bfree(unsigned int block_num) {
     释放一个空闲块,加入到当前空闲块堆栈中
      */
 }
+
+int main(){}

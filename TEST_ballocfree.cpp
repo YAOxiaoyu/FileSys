@@ -11,7 +11,6 @@ void format_sb_freedi() {
     int free_dblock = 101;
     //一共这么多个空闲数据块
     super_block.s_nfree = free_dblock;
-    
 
     //初始化空闲块
     //从最后一块开始分组
@@ -23,12 +22,10 @@ void format_sb_freedi() {
         } else {
             super_block.s_free[0] = NICFREE;
             super_block.s_free[1] =
-                DATASTART +
-                i * NICFREE * BLOCKSIZ; //指向下一个记录空闲块的物理块
+                0 + (i * NICFREE - 1) * 1; //?改了 //指向下一个记录空闲块的物理块
         }
         for (int j = 2; j < NICFREE + 1; j++) {
-            super_block.s_free[j] =
-                DATASTART + (i * NICFREE - (j - 1)) * BLOCKSIZ;
+            super_block.s_free[j] = 0 + (i * NICFREE - (j)) * 1; //?改了
         }
         if (i == 1) {
             //第一个磁盘块
@@ -39,13 +36,16 @@ void format_sb_freedi() {
             // TODO 写回虚拟盘
 
         } else {
-            //写到 DATASTART + (i-1) * NICFREE * BLOCKSIZ
+            //写到 0 + (i-1) * NICFREE * 1
+            int k = 0 + ((i-1) * NICFREE-1) * 1;//?改了
+            cout << k;
             // TODO 写回虚拟盘
         }
     }
+    // TODO 多出来的多余的记录到哪里?
 
     //因为前三个已经被占用,所以空闲块堆栈指针指向当前空的第一个数据块->即第4个
-    super_block.s_pfree = DATASTART + 3 * BLOCKSIZ;
+    super_block.s_pfree = 0 + 3 * 1;
 }
 
 unsigned int balloc() {
@@ -61,5 +61,7 @@ void bfree(unsigned int block_num) {
      */
 }
 
-int main() { 
-    format_sb_freedi(); }
+int main() {
+    format_sb_freedi();
+    return 0;
+}

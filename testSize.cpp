@@ -2,9 +2,9 @@
 #include <iostream>
 
 int main() {
-    struct inode i;
+     inode i;
     std::cout << sizeof(i) << std::endl;
 
-    struct dinode ii;
+     dinode ii;
     std::cout << sizeof(ii) << std::endl;
 }

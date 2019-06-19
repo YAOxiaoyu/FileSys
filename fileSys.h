@@ -1,8 +1,13 @@
 /*目前各种数据结构 */
+
+#ifndef FILESYS_H
+#define FILESYS_H
+
+
 #include "virtualDisk.h"
 #include <iostream>
 
-using namespace std;
+
 
 #define BLOCKSIZ 512   //每块大小
 #define SYSOPENFILE 40 //系统打开文件表最大项数
@@ -18,7 +23,7 @@ using namespace std;
 #define dinodeSIZ 32             //每个磁盘i节点所占字节
 #define dinodeBLK 32             //所有磁盘i节点共占32个物理块
 #define FILEBLK 512              // 共有512个目录文件物理块
-#define NICFREE 50               //超级块中空闲块数组的最大块数
+#define NICFREE 50              //超级块中空闲块数组的最大块数
 #define NICINOD 50               ///超级块中空闲节点的最大块数
 #define dinodeSTART 2 * BLOCKSIZ // i节点起始地址
 #define DATASTART (2 + dinodeBLK) * BLOCKSIZ //目录、文件区起始地址
@@ -26,14 +31,17 @@ using namespace std;
 #define iNODESIZE 64      // 目前每个iNODE占64B
 #define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
+
 /*文件数据结构*/
 struct super_block {
+
+    
     unsigned short s_isize;       //索引节点块块数
     unsigned long s_fsize;        //数据块块数
 
     unsigned int s_nfree;         //空闲块块数
     unsigned short s_pfree;       //空闲块指针
-    unsigned int s_free[NICFREE]; //空闲块堆栈
+    unsigned int s_free[NICFREE + 1]; //空闲块堆栈 //多出来的一个是栈底保存当前栈中有多少个空闲块
 
     unsigned int s_ninode;         //空闲索引节点数
     unsigned short s_pinode;       //空闲索引节点指针
@@ -109,7 +117,7 @@ struct user {
 // extern struct hinode hinode[NHINO]; //?什么东西
 extern struct dir cur_dir;
 extern struct file sys_ofile[SYSOPENFILE]; //?什么东西
-extern struct super_block super_block;
+//extern struct super_block super_block;
 extern struct password password[PWDNUM];
 extern struct user user[USERNUM];
 extern FILE *fd;
@@ -120,3 +128,7 @@ extern int user_id, file_block;
 void format();
 unsigned int balloc(); //磁盘块分配函数
 void bfree(unsigned int block_num);          //磁盘块释放函数
+
+
+
+#endif

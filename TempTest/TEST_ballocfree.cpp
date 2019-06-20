@@ -1,8 +1,13 @@
+
+
 #include "../fileSys.h"
 #include <iostream>
 
 using namespace std;
 struct super_block super_block;
+
+struct super_block sub[300];
+
 int datas = 0;
 int blocksi = 1;
 
@@ -10,7 +15,9 @@ void format_sb_freedi() {
 
     //总块数可以先忽略根目录,etc,pwd分配的物理磁盘块,最后再分配
     // int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
+
     int free_dblock = 201;
+
     super_block.s_nfree = free_dblock;
 
     for (int i = free_dblock / NICFREE; i > 0; i--) {
@@ -28,18 +35,18 @@ void format_sb_freedi() {
         if (i == 1) {
             super_block.s_free[0] = NICFREE - 3;
             super_block.s_nfree -= 3;
-            //写到 datas + 3 *　NICFREE * blocksi
-            // TODO 把第一个空闲组 -> 写到第4个盘
-
         } else {
             //写到 datas + ((i-1) * NICFREE-1) * blocksi
             // TODO 写回虚拟盘
+            //模拟写回虚拟盘
+
+            sub[datas + ((i - 1) * NICFREE - 1) * blocksi] = super_block;
         }
-        cout << i << " : ";
-        cout << super_block.s_free[0] << " ";
-        cout << super_block.s_free[1] << " ";
-        cout << super_block.s_free[2] << ".." << super_block.s_free[NICFREE];
-        cout << endl;
+        // cout << i << " : ";
+        // cout << super_block.s_free[0] << " ";
+        // cout << super_block.s_free[1] << " ";
+        // cout << super_block.s_free[2] << ".." << super_block.s_free[NICFREE];
+        // cout << endl;
     }
     // TODO 处理多出来的磁盘
 
@@ -72,7 +79,11 @@ unsigned int balloc() {
         if (super_block.s_free[1] != 0) {
             //如果当前不是最后一块
             //读super_block.s_free[1]处的block并付给super_block.sfree[];
-            /// TODO 读super_block
+            // TODO 读super_block[1]
+
+            //模拟读
+            super_block = sub[super_block.s_free[1]];
+
             super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
             super_block.s_nfree--;
         } else {
@@ -96,6 +107,9 @@ void bfree(unsigned int block_num) {
         //要写到的地址为block_num
         // TODO 写回磁盘
 
+        //模拟写
+        sub[block_num] = super_block;
+
         //更新当前空闲块堆栈
         super_block.s_free[0] = 1;
         super_block.s_free[1] = block_num;
@@ -111,14 +125,31 @@ void bfree(unsigned int block_num) {
 
 int main() {
     format_sb_freedi();
-    cout << endl;
-    for (int i = 0; i < 20; i++) {
-        cout << balloc() << " ";
+
+    for (int i = 0; i < NICFREE + 1; i++) {
+        cout << super_block.s_free[i] << " ";
     }
     cout << endl;
+    for (int k = 0; k < 300; k++) {
+        if (sub[k].s_free[0] != 0) {
+            for (int i = 0; i < NICFREE + 1; i++) {
+                cout << sub[k].s_free[i] << " ";
+            }
+            cout << endl;
+        }
+    }
+
+    cout << endl;
+    for (int i = 0; i < 123; i++) {
+        cout << balloc() << " ";
+    }
+
     for (int i = 0; i < 1; i++) {
         bfree(5);
     }
+
+    cout << endl;
     cout << balloc() << " ";
+
     cout << endl;
 }

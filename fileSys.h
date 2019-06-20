@@ -123,6 +123,7 @@ extern struct user user[USERNUM];
 extern FILE *fd;
 extern struct inode *cur_path_node;
 extern int user_id, file_block;
+extern class virtualDisk vir_disk;
 
 // 函数声明
 void format();

@@ -9,9 +9,9 @@
         "${file}",
         "-o",
         "/media/D/桌面/OS/FileSys/Out/${fileBasenameNoExtension}",
-        //"-lm",
-        //"-L/lib",
-        //"-L/usr/lib"
+        // "-lm",
+        // "-L/lib",
+        // "-L/usr/lib"
       ],
       "options": {
         "cwd": "/usr/bin"

@@ -1,8 +1,8 @@
-#include "fileSys.h"
+#include "../fileSys.h"
 #include <iostream>
 
 using namespace std;
-struct super_block super_block;
+//struct super_block super_block;
 
 void format_sb_freedi() {
 
@@ -18,11 +18,12 @@ void format_sb_freedi() {
         if (i == free_dblock / NICFREE) {
             // 最后一块
             super_block.s_free[0] = NICFREE - 1;
-            super_block.s_free[1] = -1;
+            super_block.s_free[1] = 0;
         } else {
             super_block.s_free[0] = NICFREE;
             super_block.s_free[1] =
-                0 + (i * NICFREE - 1) * 1; //?改了 //指向下一个记录空闲块的物理块
+                0 +
+                (i * NICFREE - 1) * 1; //?改了 //指向下一个记录空闲块的物理块
         }
         for (int j = 2; j < NICFREE + 1; j++) {
             super_block.s_free[j] = 0 + (i * NICFREE - (j)) * 1; //?改了
@@ -37,14 +38,18 @@ void format_sb_freedi() {
 
         } else {
             //写到 0 + (i-1) * NICFREE * 1
-            int k = 0 + ((i-1) * NICFREE-1) * 1;//?改了
-            cout << k;
+            int k = 0 + ((i - 1) * NICFREE - 1) * 1; //?改了
             // TODO 写回虚拟盘
         }
+        cout << i << " : ";
+        cout << super_block.s_free[0] << " ";
+        cout << super_block.s_free[1] << " ";
+        cout << super_block.s_free[2] << ".." << super_block.s_free[NICFREE];
+        cout << endl;
     }
     // TODO 多出来的多余的记录到哪里?
 
-    //因为前三个已经被占用,所以空闲块堆栈指针指向当前空的第一个数据块->即第4个
+    //因为前三个已经被占用,所以空闲块堆栈指针指向当前空的第一个数据块->即第4个 
     super_block.s_pfree = 0 + 3 * 1;
 }
 

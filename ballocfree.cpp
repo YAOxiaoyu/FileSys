@@ -8,7 +8,6 @@ void format_sb_freedi() {
 
     //总块数可以先忽略根目录,etc,pwd分配的物理磁盘块,最后再分配
     int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
-    //一共这么多个空闲数据块
     super_block.s_nfree = free_dblock;
 
     //初始化空闲块
@@ -33,7 +32,6 @@ void format_sb_freedi() {
             super_block.s_free[0] = NICFREE - 3;
             super_block.s_nfree -= 3; // 分配了三个,减3
             // TODO 把第一个空闲组 -> 写到第4个盘
-            // TODO 写回虚拟盘
 
         } else {
             //写到 DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ

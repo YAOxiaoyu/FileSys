@@ -117,7 +117,7 @@ struct user {
 // extern struct hinode hinode[NHINO]; //?什么东西
 extern struct dir cur_dir;
 extern struct file sys_ofile[SYSOPENFILE]; //?什么东西
-//extern struct super_block super_block;
+extern struct super_block super_block;
 extern struct password password[PWDNUM];
 extern struct user user[USERNUM];
 extern FILE *fd;

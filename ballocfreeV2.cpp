@@ -61,6 +61,7 @@ unsigned int balloc() {
     }
 
     super_block.s_nfree--;
+    // TODO 更新超级块修改标志
     return free_block;
 }
 

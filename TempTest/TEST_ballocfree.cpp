@@ -123,9 +123,11 @@ void bfree(unsigned int block_num) {
     // TODO 将blcok_num地址的内容清空
 }
 
-int main() {
-    format_sb_freedi();
-
+void outDisk() {
+    cout <<endl;
+    cout << "------------------------------------------------------------------"
+            "------"
+         << endl;
     for (int i = 0; i < NICFREE + 1; i++) {
         cout << super_block.s_free[i] << " ";
     }
@@ -138,6 +140,15 @@ int main() {
             cout << endl;
         }
     }
+    cout << "------------------------------------------------------------------"
+            "------"
+         << endl;
+}
+
+int main() {
+    format_sb_freedi();
+
+    outDisk();
 
     cout << endl;
     for (int i = 0; i < 123; i++) {
@@ -147,6 +158,8 @@ int main() {
     for (int i = 0; i < 1; i++) {
         bfree(5);
     }
+
+    outDisk();
 
     cout << endl;
     cout << balloc() << " ";

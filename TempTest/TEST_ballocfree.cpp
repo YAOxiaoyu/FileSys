@@ -16,7 +16,7 @@ void format_sb_freedi() {
     //总块数可以先忽略根目录,etc,pwd分配的物理磁盘块,最后再分配
     // int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
 
-    int free_dblock = 201;
+    int free_dblock = 100;
 
     super_block.s_nfree = free_dblock;
 
@@ -70,11 +70,14 @@ unsigned int balloc() {
 
     if (super_block.s_free[0] != 1) {
         super_block.s_free[0]--;
-        if (super_block.s_free[1] == 0)
+        if (super_block.s_free[1] == 0) {
             super_block.s_pfree = super_block.s_free[super_block.s_free[0] + 1];
-        else
+            // super_block.s_free[super_block.s_free[0] + 1] = 0;
+        } else {
+
             super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
-        super_block.s_nfree--;
+            // super_block.s_free[super_block.s_free[0]] = 0;
+        }
     } else {
         if (super_block.s_free[1] != 0) {
             //如果当前不是最后一块
@@ -82,16 +85,20 @@ unsigned int balloc() {
             // TODO 读super_block[1]
 
             //模拟读
-            super_block = sub[super_block.s_free[1]];
+            // super_block = sub[super_block.s_free[1]];
+            struct super_block temp = sub[super_block.s_free[1]];
+            for (int i = 0; i < NICFREE + 1; i++) {
+                super_block.s_free[i] = temp.s_free[i];
+            }
 
-            super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
-            super_block.s_nfree--;
+            super_block.s_pfree = super_block.s_free[super_block.s_free[0] + 1];
         } else {
             //当前块为最后一块,即最后一块也用完了
             super_block.s_pfree = 0;
-            super_block.s_nfree--; //自减后应为0
         }
     }
+
+    super_block.s_nfree--;
     return free_block;
 }
 
@@ -101,8 +108,8 @@ void bfree(unsigned int block_num) {
      */
     super_block.s_nfree++;
 
-    if ((super_block.s_pfree == NICFREE && super_block.s_free[1] != 0) ||
-        super_block.s_pfree == NICFREE - 1 && super_block.s_free[1] == 0) {
+    if ((super_block.s_free[0] == NICFREE && super_block.s_free[1] != 0) ||
+        super_block.s_free[0] == NICFREE - 1 && super_block.s_free[1] == 0) {
         //此种状态下要将super.s_free[]写到虚拟盘中了
         //要写到的地址为block_num
         // TODO 写回磁盘
@@ -113,27 +120,40 @@ void bfree(unsigned int block_num) {
         //更新当前空闲块堆栈
         super_block.s_free[0] = 1;
         super_block.s_free[1] = block_num;
-        super_block.s_pfree = super_block.s_free[0];
+        if (super_block.s_free[1] != 0)
+            super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
+        else
+            super_block.s_pfree = super_block.s_free[super_block.s_free[0] + 1];
     } else {
         super_block.s_free[0]++;
-        super_block.s_free[super_block.s_free[0]] = block_num;
-        super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
+        if (super_block.s_free[1] != 0) {
+            super_block.s_free[super_block.s_free[0]] = block_num;
+            super_block.s_pfree = super_block.s_free[super_block.s_free[0]];
+        } else {
+            super_block.s_free[super_block.s_free[0] + 1] = block_num;
+            super_block.s_pfree = super_block.s_free[super_block.s_free[0] + 1];
+        }
     }
 
     // TODO 将blcok_num地址的内容清空
 }
 
 void outDisk() {
-    cout <<endl;
+    cout << endl;
     cout << "------------------------------------------------------------------"
             "------"
          << endl;
+
+    cout << "sb:";
+
     for (int i = 0; i < NICFREE + 1; i++) {
         cout << super_block.s_free[i] << " ";
     }
     cout << endl;
+
     for (int k = 0; k < 300; k++) {
         if (sub[k].s_free[0] != 0) {
+            cout << k << ":";
             for (int i = 0; i < NICFREE + 1; i++) {
                 cout << sub[k].s_free[i] << " ";
             }
@@ -151,18 +171,24 @@ int main() {
     outDisk();
 
     cout << endl;
-    for (int i = 0; i < 123; i++) {
+    cout << super_block.s_nfree << endl;
+    for (int i = 0; i < 96; i++) {
         cout << balloc() << " ";
     }
 
-    for (int i = 0; i < 1; i++) {
-        bfree(5);
-    }
-
     outDisk();
+    cout << super_block.s_nfree << endl;
 
-    cout << endl;
-    cout << balloc() << " ";
+    // bfree(5);
+
+    // outDisk();
+
+    // bfree(20);
+
+    // outDisk();
+
+    // cout << endl;
+    // cout << balloc() << " ";
 
     cout << endl;
 }

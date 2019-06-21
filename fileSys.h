@@ -41,7 +41,7 @@ struct super_block {
 
     unsigned int s_nfree;         //空闲块块数
     unsigned short s_pfree;       //空闲块指针
-    unsigned int s_free[NICFREE + 1]; //空闲块堆栈 //多出来的一个是栈底保存当前栈中有多少个空闲块
+    unsigned int s_free[NICFREE]; //空闲块堆栈
 
     unsigned int s_ninode;         //空闲索引节点数
     unsigned short s_pinode;       //空闲索引节点指针

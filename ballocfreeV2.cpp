@@ -26,7 +26,7 @@ void format_sb_freedi() {
             //只需记录在超级块中即可
             for (int m = 0; m < 3; m++)
                 //分配初始化用掉的数据块
-                balloc()
+                balloc();
         } else {
             //写到 DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
             // TODO 写回虚拟盘

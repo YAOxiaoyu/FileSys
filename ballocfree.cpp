@@ -6,7 +6,6 @@ struct super_block super_block;
 
 void format_sb_freedi() {
 
-    //总块数可以先忽略根目录,etc,pwd分配的物理磁盘块,最后再分配
     int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
     super_block.s_nfree = free_dblock - (free_dblock % 50 + 1);
     super_block.s_pfree = NICFREE - 1; // 堆栈指针
@@ -26,7 +25,7 @@ void format_sb_freedi() {
             for (int m = 0; m < 3; m++)
                 balloc();
         } else {
-            //写到 DATASTART + ((i-1) * NICFREE-BLOCKSIZ) * BLOCKSIZ
+            //写到 DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
             // TODO 写回虚拟盘
         }
     }
@@ -57,6 +56,7 @@ unsigned int balloc() {
 
     super_block.s_nfree--;
     super_block.s_fmod = 1;
+
     return free_block;
 }
 
@@ -67,6 +67,7 @@ void bfree(unsigned int block_num) {
      */
 
     super_block.s_nfree++;
+
     if (super_block.s_pfree == NICFREE) {
         //写回block_num
         // TODO 写回block_num
@@ -74,6 +75,8 @@ void bfree(unsigned int block_num) {
         super_block.s_free[super_block.s_pfree] = block_num;
     } else {
         super_block.s_pfree++;
-        super_block.free[super_block.s_pfree] = block_num;
+        super_block.n_free[super_block.s_pfree] = block_num;
     }
+
+    super_block.s_fmod = 1;
 }

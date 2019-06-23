@@ -93,7 +93,7 @@ struct dir_item {
 };
 
 struct dir {
-    class dir_item dir[DIRNUM];
+    struct dir_item dir[DIRNUM];
     int size; //当前目录大小
 };
 
@@ -132,7 +132,8 @@ extern int user_id, file_block;
 extern unsigned int inode_data_start_block;     //当前使用的Inode块的数据的起始地址
 
 extern unsigned int inode_ino;  //当前inode ino
-extern unsigned int dir_ino;   //dir ino
+extern unsigned int dir_ino;  //目录对应文件ino
+extern unsigned int home_ino; //根目录的inode
 
 //文件打开表
 extern map<unsigned int,struct inode>inode_o;   //inode打开表(系统文件打开表)
@@ -143,11 +144,10 @@ extern map<string,unsigned int>dir_list;   //当前目录表
 void format();
 unsigned int balloc(); //磁盘块分配函数
 void bfree(unsigned int block_num);          //磁盘块释放函数
-void get_cur_dir();           //获取当前目录
-void mkdir(string new_name)；   //当前目录下创建新文件夹
+void get_cur_dir(unsigned int inode_ino,int output=1);     //获取当前文件的目录表          //获取当前目录
+void mkdir(string new_name);   //当前目录下创建新文件夹
+void get_dir(string path);   // 多级目录
 
-struct  inode *iget(unsigned int inode_id);  //获取inode ino 对应inode节点
-
-
+//inode * iget(unsigned int inode_id);  //获取inode ino 对应inode节点
 
 #endif

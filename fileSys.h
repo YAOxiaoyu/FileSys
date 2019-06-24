@@ -140,7 +140,7 @@ extern map<unsigned int, struct inode> inode_o; // inode打开表(系统文件�
 extern map<string, unsigned int> dir_list; //当前目录表
 
 // 函数声明
-void format();
+void format(virtualDisk& vD);
 unsigned int balloc();              //磁盘块分配函数
 void bfree(unsigned int block_num); //磁盘块释放函数
 void get_cur_dir(unsigned int inode_ino,

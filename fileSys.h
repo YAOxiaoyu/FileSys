@@ -144,7 +144,7 @@ extern map<string,unsigned int>dir_list;   //当前目录表
 
 
 // 函数声明
-void format();
+void format(virtualDisk& vD);
 unsigned int balloc(); //磁盘块分配函数
 void bfree(unsigned int block_num);          //磁盘块释放函数
 void get_cur_dir(unsigned int inode_ino,int output=1);     //获取当前文件的目录表          //获取当前目录

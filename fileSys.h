@@ -148,9 +148,9 @@ void get_cur_dir(unsigned int inode_ino,
 void mkdir(string new_name); //当前目录下创建新文件夹
 void get_dir(string path);   // 多级目录
 
-// inode * iget(unsigned int inode_id);  //获取inode ino 对应inode节点
-
-void ifree(struct inode *temp);
+struct inode *iget(unsigned int inode_id);  //获取inode ino 对应inode节点
+void iput(unsigned int inode_id);
+void ifree(unsigned int inode_id);
 struct inode *ialloc();
 
 #endif

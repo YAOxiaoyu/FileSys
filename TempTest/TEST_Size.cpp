@@ -14,6 +14,6 @@ int main() {
     dir_item dit;
     std::cout << sizeof(dit) << std::endl;
 
-    char c;
-    std::cout << sizeof(c) << std::endl;
+    char cd;
+    std::cout << sizeof(cd) << std::endl;
 }

@@ -117,6 +117,7 @@ struct user {
 };
 
 /*全局变量 */
+extern class virtualDisk vD;
 extern struct dir cur_dir;
 extern struct file sys_ofile[SYSOPENFILE];
 extern struct super_block super_block;

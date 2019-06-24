@@ -2,15 +2,18 @@
 #include <iostream>
 
 int main() {
-     inode i;
+    inode i;
     std::cout << sizeof(i) << std::endl;
 
-     dinode ii;
+    dinode ii;
     std::cout << sizeof(ii) << std::endl;
 
-     dir di;
-     std::cout << sizeof(di) << std::endl;
+    dir di;
+    std::cout << sizeof(di) << std::endl;
 
-     dir_item dit;
-     std::cout << sizeof(dit) << std::endl;
+    dir_item dit;
+    std::cout << sizeof(dit) << std::endl;
+
+    char c;
+    std::cout << sizeof(c) << std::endl;
 }

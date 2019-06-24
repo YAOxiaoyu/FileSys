@@ -47,10 +47,10 @@ void format(virtualDisk& vD) {
 		}
 		else {
 			//写到 DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
-			vD.writeBlock(blockSize, &super_block);//写回虚拟盘
+			vD.writeBlock(DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ, &super_block);//写回虚拟盘
 			vD.writeBack();
 		}
 	}
-
+    vD.writeBlock(blockSize, &super_block);
 	vD.writeBack();
 }

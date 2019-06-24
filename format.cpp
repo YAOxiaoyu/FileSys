@@ -3,16 +3,20 @@
 using namespace std;
 void format(virtualDisk& vD) {
 	
+	for (int i = 0; i < DINODE_NUM; i++) {
+		super_block.binode_bitmap[i] = 0;
+	}
+	super_block.s_ninode = DINODE_NUM;
 
 	inode initInode[16];
-	inode iInode;//TODO: 根目录i结点
-	iInode.di_addr[0] = 33 * BLOCKSIZ;
-	iInode.di_size = DIRSIZ + 2;
-	iInode.di_mode = 0;
-	iInode.di_number = 1;
-	iInode.i_count = 0;
-	iInode.i_ino = 0;//?
-	initInode[0] = iInode;
+	inode *iInode=ialloc();//TODO: 根目录i结点
+	iInode->di_addr[0] = 33 * BLOCKSIZ;
+	iInode->di_size = DIRSIZ + 2;
+	iInode->di_mode = 0;
+	iInode->di_number = 1;
+	iInode->i_count = 0;
+	iInode->i_ino = 0;//?
+	initInode[0] = *iInode;
 	vD.writeBlock(2 * blockSize,initInode);
 	dir_item iDir[16];//根目录
 	iDir[0].d_name[0] = '.';

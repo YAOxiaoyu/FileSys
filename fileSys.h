@@ -3,33 +3,32 @@
 #ifndef FILESYS_H
 #define FILESYS_H
 
-
 #include "virtualDisk.h"
 #include <iostream>
+#include <map>
 #include <stdio.h>
-#include<stdlib.h>
-#include<string>
-#include<vector>
-#include<map>
+#include <stdlib.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 
 #define BLOCKSIZ 512   //每块大小
 #define SYSOPENFILE 40 //系统打开文件表最大项数
 #define DIRNUM 128 //每个目录所包含的最大目录项数（文件数）
-#define DIRSIZ 14 //每个目录项名字部分所占字节数，另加i节点号2个字节
+#define DIRSIZ 20 //每个目录项占20字节
 #define PWDSIZ 12 //口令字
 #define PWDNUM 32 //最多可设32个口令登录
 #define NOFILE 20 //每个用户最多可打开20个文件，即用户打开文件最大次数
 #define NADDR 10 //每个i节点最多指向10块，addr[0]~addr[9]
 //这里应该是只用了十个直接索引//
-//TODO:13个?
+// TODO:13个?
 
-#define USERNUM 10               //最多允许10个用户登录
+#define USERNUM 10 //最多允许10个用户登录
 
-#define DINODESIZ 64             //每个磁盘i节点所占字节
-#define DINODEBLK 32             //所有磁盘i节点共占32个物理块
-#define DINODE_NUM DINODEBLK*BLOCKSIZ/DINODESIZ
+#define DINODESIZ 64 //每个磁盘i节点所占字节
+#define DINODEBLK 32 //所有磁盘i节点共占32个物理块
+#define DINODE_NUM DINODEBLK *BLOCKSIZ / DINODESIZ
 
 #define FILEBLK 512              // 共有512个目录文件物理块
 #define NICFREE 50               //超级块中空闲块数组的最大块数
@@ -39,22 +38,20 @@ using namespace std;
 
 #define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
-
 /*文件数据结构*/
 struct super_block {
 
-    
-    //unsigned short s_isize;       //索引节点块块数
-    unsigned long s_fsize;        //数据块块数
+    // unsigned short s_isize;       //索引节点块块数
+    unsigned long s_fsize; //数据块块数
 
     unsigned int s_nfree;         //空闲块块数
     unsigned short s_pfree;       //空闲块指针
     unsigned int s_free[NICFREE]; //空闲块堆栈
 
-    unsigned int s_ninode;         //空闲索引节点数
-    //unsigned short s_pinode;       //空闲索引节点指针
-    //unsigned int s_inode[NICINOD]; //空闲索引节点数组
-    //unsigned int s_rinode;         //铭记索引节点
+    unsigned int s_ninode; //空闲索引节点数
+    // unsigned short s_pinode;       //空闲索引节点指针
+    // unsigned int s_inode[NICINOD]; //空闲索引节点数组
+    // unsigned int s_rinode;         //铭记索引节点
     unsigned short binode_bitmap[DINODE_NUM];
 
     char s_fmod; //超级块修改标志
@@ -132,25 +129,29 @@ extern struct user user[USERNUM];
 extern FILE *fd;
 extern struct inode *cur_path_node;
 extern int user_id, file_block;
-extern unsigned int inode_data_start_block;     //当前使用的Inode块的数据的起始地址
+extern unsigned int inode_data_start_block; //当前使用的Inode块的数据的起始地址
 
-extern unsigned int inode_ino;  //当前inode ino
-extern unsigned int dir_ino;  //目录对应文件ino
-extern unsigned int home_ino; //根目录的inode
+extern unsigned int inode_ino; //当前inode ino
+extern unsigned int dir_ino;   //目录对应文件ino
+extern unsigned int home_ino;  //根目录的inode
 
 //文件打开表
-extern map<unsigned int,struct inode>inode_o;   //inode打开表(系统文件打开表)
-extern map<string,unsigned int>dir_list;   //当前目录表
-
+extern map<unsigned int, struct inode> inode_o; // inode打开表(系统文件打开表)
+extern map<string, unsigned int> dir_list; //当前目录表
 
 // 函数声明
-void format(virtualDisk& vD);
-unsigned int balloc(); //磁盘块分配函数
-void bfree(unsigned int block_num);          //磁盘块释放函数
-void get_cur_dir(unsigned int inode_ino,int output=1);     //获取当前文件的目录表          //获取当前目录
-void mkdir(string new_name);   //当前目录下创建新文件夹
+void format();
+unsigned int balloc();              //磁盘块分配函数
+void bfree(unsigned int block_num); //磁盘块释放函数
+void get_cur_dir(unsigned int inode_ino,
+                 int output = 1); //获取当前文件的目录表          //获取当前目录
+void mkdir(string new_name); //当前目录下创建新文件夹
 void get_dir(string path);   // 多级目录
 
-//inode * iget(unsigned int inode_id);  //获取inode ino 对应inode节点
+struct inode *iget(unsigned int inode_id);  //获取inode ino 对应inode节点
+void iput(unsigned int inode_id);
+void ifree(unsigned int inode_id);
+struct inode *ialloc();
+
 
 #endif

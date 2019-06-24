@@ -24,17 +24,19 @@ using namespace std;
 #define NADDR 10 //每个i节点最多指向10块，addr[0]~addr[9]
 //这里应该是只用了十个直接索引//
 //TODO:13个?
-#define NHINO 128 //共128个Hash链表，提供索引i节点（必须为2的幂）
+
 #define USERNUM 10               //最多允许10个用户登录
-#define DINODESIZ 32             //每个磁盘i节点所占字节
+
+#define DINODESIZ 64             //每个磁盘i节点所占字节
 #define DINODEBLK 32             //所有磁盘i节点共占32个物理块
+#define DINODE_NUM DINODEBLK*BLOCKSIZ/DINODESIZ
+
 #define FILEBLK 512              // 共有512个目录文件物理块
 #define NICFREE 50               //超级块中空闲块数组的最大块数
 #define NICINOD 50               ///超级块中空闲节点的最大块数
 #define DINODESTART 2 * BLOCKSIZ // i节点起始地址
 #define DATASTART (2 + DINODEBLK) * BLOCKSIZ //目录、文件区起始地址
 
-#define iNODESIZE 64      // 目前每个iNODE占64B
 #define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
 
@@ -42,7 +44,7 @@ using namespace std;
 struct super_block {
 
     
-    unsigned short s_isize;       //索引节点块块数
+    //unsigned short s_isize;       //索引节点块块数
     unsigned long s_fsize;        //数据块块数
 
     unsigned int s_nfree;         //空闲块块数
@@ -50,9 +52,10 @@ struct super_block {
     unsigned int s_free[NICFREE]; //空闲块堆栈
 
     unsigned int s_ninode;         //空闲索引节点数
-    unsigned short s_pinode;       //空闲索引节点指针
-    unsigned int s_inode[NICINOD]; //空闲索引节点数组
-    unsigned int s_rinode;         //铭记索引节点
+    //unsigned short s_pinode;       //空闲索引节点指针
+    //unsigned int s_inode[NICINOD]; //空闲索引节点数组
+    //unsigned int s_rinode;         //铭记索引节点
+    unsigned short binode_bitmap[DINODE_NUM];
 
     char s_fmod; //超级块修改标志
 };

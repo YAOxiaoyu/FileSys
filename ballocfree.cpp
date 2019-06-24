@@ -68,6 +68,8 @@ void bfree(unsigned int block_num) {
 
     super_block.s_nfree++;
 
+    //TODO 清空block
+
     if (super_block.s_pfree == NICFREE) {
         //写回block_num
         // TODO 写回block_num
@@ -75,7 +77,7 @@ void bfree(unsigned int block_num) {
         super_block.s_free[super_block.s_pfree] = block_num;
     } else {
         super_block.s_pfree++;
-        super_block.n_free[super_block.s_pfree] = block_num;
+        super_block.s_free[super_block.s_pfree] = block_num;
     }
 
     super_block.s_fmod = 1;

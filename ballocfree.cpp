@@ -6,7 +6,7 @@ struct super_block super_block;
 
 void format_sb_freedi() {
 
-    int free_dblock = ALLBLOCKNUM - (2 + dinodeBLK);
+    int free_dblock = ALLBLOCKNUM - (2 + DINODEBLK);
     super_block.s_nfree = free_dblock - (free_dblock % 50 + 1);
     super_block.s_pfree = NICFREE - 1; // 堆栈指针
 

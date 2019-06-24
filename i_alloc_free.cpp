@@ -2,7 +2,7 @@
 #include "fileSys.h"
 /*
 下面函数建立在头文件进行如下修改情况下编写
-#define dinode_NUM dinodeBLK*BLOCKSIZ/dinodeSIZ
+#define DINODE_NUM DINODEBLK*BLOCKSIZ/DINODESIZ
 struct super_block {
     
     //unsigned short s_isize;       //索引节点块块数
@@ -16,13 +16,13 @@ struct super_block {
     //unsigned short s_pinode;       //空闲索引节点指针
     //unsigned int s_inode[NICINOD]; //空闲索引节点数组
     //unsigned int s_rinode;         //铭记索引节点
-    unsigned short binode_bitmap[dinode_NUM];
+    unsigned short binode_bitmap[DINODE_NUM];
     char s_fmod; //超级块修改标志
 };
  */
 struct inode *ialloc()
 {
-	//在dinode位图中顺序查找空闲的dinode，找到后将其信息读入一个内存新建的inode，并返回。
+	//在DINODE位图中顺序查找空闲的DINODE，找到后将其信息读入一个内存新建的inode，并返回。
 	struct inode *temp;
 	if (super_block.s_ninode == 0)
 	{
@@ -32,11 +32,11 @@ struct inode *ialloc()
 	else
 	{
 		temp = (struct inode *)malloc(sizeof(struct inode));
-		//顺序查找空闲的dinode
+		//顺序查找空闲的DINODE
 		int i;
-		for (i = 0; i < dinode_NUM; i++)
+		for (i = 0; i < DINODE_NUM; i++)
 		{
-			if (super_block.binode_bitmap[i] == 0) //找到空闲dinode
+			if (super_block.binode_bitmap[i] == 0) //找到空闲DINODE
 				break;
 		}
 

@@ -9,7 +9,7 @@ void format(virtualDisk& vD) {
 	super_block.s_ninode = DINODE_NUM;
 
 	inode initInode[16];
-	inode *iInode=ialloc();//TODO: ��Ŀ¼i���
+	inode *iInode=ialloc();//TODO: 根目录i结点
 	iInode->di_addr[0] = 33 * BLOCKSIZ;
 	iInode->di_size = DIRSIZ + 2;
 	iInode->di_mode = 0;
@@ -18,16 +18,16 @@ void format(virtualDisk& vD) {
 	iInode->i_ino = 0;//?
 	initInode[0] = *iInode;
 	vD.writeBlock(2 * blockSize,initInode);
-	dir_item iDir[16];//��Ŀ¼
+	dir_item iDir[16];//根目录
 	iDir[0].d_name[0] = '.';
 	iDir[0].d_ino = 0;
 	vD.writeBlock(33 * blockSize, iDir);
 
 
-	/*�������ʼ��*/
+	/*超级块初始化*/
 	int free_dblock = ALLBLOCKNUM - (2 + DINODEBLK);
 	super_block.s_nfree = free_dblock - (free_dblock % 50 + 1);
-	super_block.s_pfree = NICFREE - 1; // ��ջָ��
+	super_block.s_pfree = NICFREE - 1; // 堆栈指针
 
 	for (int i = free_dblock / NICFREE; i > 0; i--) {
 		if (i == free_dblock / NICFREE) {
@@ -41,13 +41,13 @@ void format(virtualDisk& vD) {
 				DATASTART + (i * NICFREE - (j + 1)) * BLOCKSIZ;
 		}
 		if (i == 1) {
-			//ֻ���¼�ڳ������м���
+			//只需记录在超级块中即可
 			for (int m = 0; m < 1; m++)
 				balloc();
 		}
 		else {
-			//д�� DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
-			vD.writeBlock(blockSize, &super_block);//д��������
+			//写到 DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
+			vD.writeBlock(blockSize, &super_block);//写回虚拟盘
 			vD.writeBack();
 		}
 	}

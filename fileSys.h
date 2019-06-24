@@ -16,7 +16,8 @@ using namespace std;
 #define BLOCKSIZ 512   //每块大小
 #define SYSOPENFILE 40 //系统打开文件表最大项数
 #define DIRNUM 128 //每个目录所包含的最大目录项数（文件数）
-#define DIRSIZ 20 //每个目录项占20字节
+#define NAMESIZ 16 //每个文件或者目录名最大字节
+#define DIRSIZ 20 //计算可得每个目录项最大占20字节
 #define PWDSIZ 12 //口令字
 #define PWDNUM 32 //最多可设32个口令登录
 #define NOFILE 20 //每个用户最多可打开20个文件，即用户打开文件最大次数
@@ -36,6 +37,8 @@ using namespace std;
 #define DINODESTART 2 * BLOCKSIZ // i节点起始地址
 #define DATASTART (2 + DINODEBLK) * BLOCKSIZ //目录、文件区起始地址
 
+#define FILEMAXSIZE NADDR*BLOCKSIZ;
+
 #define ALLBLOCKNUM 10240 // 共有10240个物理块 5M?
 
 /*文件数据结构*/
@@ -49,9 +52,6 @@ struct super_block {
     unsigned int s_free[NICFREE]; //空闲块堆栈
 
     unsigned int s_ninode; //空闲索引节点数
-    // unsigned short s_pinode;       //空闲索引节点指针
-    // unsigned int s_inode[NICINOD]; //空闲索引节点数组
-    // unsigned int s_rinode;         //铭记索引节点
     unsigned short binode_bitmap[DINODE_NUM];
 
     char s_fmod; //超级块修改标志
@@ -59,10 +59,7 @@ struct super_block {
 
 struct inode {
 
-    // struct inode *i_forw;
-    // struct inode *i_back;
-
-    char i_flag;
+    int i_flag; //如果为0为目录,如果为1为文件
     unsigned int i_ino; //磁盘索引节点标志
 
     unsigned int i_count;     //引用计数
@@ -88,7 +85,7 @@ struct dinode {
 };
 
 struct dir_item {
-    char d_name[DIRSIZ];
+    char d_name[NAMESIZ];
     unsigned int d_ino;
 };
 
@@ -120,9 +117,8 @@ struct user {
 };
 
 /*全局变量 */
-// extern struct hinode hinode[NHINO]; //?什么东西
 extern struct dir cur_dir;
-extern struct file sys_ofile[SYSOPENFILE]; //?什么东西
+extern struct file sys_ofile[SYSOPENFILE];
 extern struct super_block super_block;
 extern struct password password[PWDNUM];
 extern struct user user[USERNUM];
@@ -138,20 +134,25 @@ extern unsigned int home_ino;  //根目录的inode
 //文件打开表
 extern map<unsigned int, struct inode> inode_o; // inode打开表(系统文件打开表)
 extern map<string, unsigned int> dir_list; //当前目录表
+extern map<unsigned int, struct inode> inode_user_o;// inode 打开表(用户文件打开表)
 
 // 函数声明
 void format(virtualDisk& vD);
+void format();
 unsigned int balloc();              //磁盘块分配函数
 void bfree(unsigned int block_num); //磁盘块释放函数
+
 void get_cur_dir(unsigned int inode_ino,
                  int output = 1); //获取当前文件的目录表          //获取当前目录
+
 void mkdir(string new_name); //当前目录下创建新文件夹
 void get_dir(string path);   // 多级目录
 
-struct inode *iget(unsigned int inode_id);  //获取inode ino 对应inode节点
+inode * iget(unsigned int inode_id);  //获取inode ino 对应inode节点
 void iput(unsigned int inode_id);
-void ifree(unsigned int inode_id);
+void ifree(struct inode *temp);
 struct inode *ialloc();
 
+int access();
 
 #endif

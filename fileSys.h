@@ -16,7 +16,7 @@ using namespace std;
 #define BLOCKSIZ 512   //每块大小
 #define SYSOPENFILE 40 //系统打开文件表最大项数
 #define DIRNUM 128 //每个目录所包含的最大目录项数（文件数）
-#define DIRSIZ 14 //每个目录项名字部分所占字节数，另加i节点号 2个字节
+#define DIRSIZ 20 //每个目录项占20字节
 #define PWDSIZ 12 //口令字
 #define PWDNUM 32 //最多可设32个口令登录
 #define NOFILE 20 //每个用户最多可打开20个文件，即用户打开文件最大次数
@@ -152,5 +152,6 @@ void get_dir(string path);   // 多级目录
 
 void ifree(struct inode *temp);
 struct inode *ialloc();
+
 
 #endif

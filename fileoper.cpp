@@ -163,7 +163,7 @@ void write_file(string file_name) {
         open_file(file_name);
     }
 
-    struct inode *file_inode = inode_user_o[file_inode_no];
+    struct inode *file_inode = &inode_user_o[file_inode_no];
 
     // TODO 写权限
     if (access() == 0) {
@@ -251,7 +251,7 @@ void write_file(string file_name) {
         }
 
         file_inode->size += text_length;
-        //TODO 更新inode
+        // TODO 更新inode
 
         if (is_max == true) {
             cout << "对不起,文件已达最大长度,系统已为您保存您输入的内容"
@@ -379,5 +379,48 @@ void delete_file(string file_name) {
         }
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
+    }
+}
+
+void close_file(string file_name) {
+    //看当前目录下有没有该文件
+    int file_inode_no;
+    int dir_item_no;
+    for (int i = 0; i < cur_dir.size; i++) {
+        string temp_name;
+        temp_name.assign(cur_dir.dir[i]);
+        if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
+            //存在且不是一个目录
+            file_inode_no = cur_dir.dir[i].d_ino;
+            dir_item_no = i;
+            break;
+        }
+        if (i == cur_dir.size - 1) {
+            //说明没找到
+            cout << "当前目录下不存在该文件,请输入正确的名字" << endl;
+            return;
+        }
+    }
+
+    if (inode_user_o.find(file_inode_no) == inode_user_o.end()) {
+        //未打开该文件
+        cout << "对不起,您当前未打开该文件" << endl;
+        return;
+    }
+
+    struct inode *file_inode = iget(file_inode_no);
+
+    //在用户打开表中删除
+    inode_user_o.erase(inode_user_o.find(file_inode_no));
+
+    //在系统打开表中--或删除
+    if (file_inode->i_count > 1) {
+        file_inode->i_count--;
+        //更新系统打开表
+        inode_o[file_inode->i_ino].i_count--;
+    }
+    else{
+        inode_o.erase(inode_o.find(file_inode_no));
+        iput(file_inode->i_ino);
     }
 }

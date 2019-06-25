@@ -16,4 +16,7 @@ int main() {
 
     char cd;
     std::cout << sizeof(cd) << std::endl;
+
+    unsigned int a;
+    std::cout << sizeof(a) << std::endl;
 }

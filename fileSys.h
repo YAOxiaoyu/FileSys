@@ -71,7 +71,10 @@ struct inode {
     unsigned int di_size;        //文件大小
     unsigned int di_addr[NADDR]; //物理块号
 
-    // TODO:多级索引
+    //三级索引
+    unsigned int first_index_addr; //512/4 * 512 = 2^7 * 2^9 = 64KB (文件最多10+128=138块)
+    unsigned int second_index_addr; //(512/4)^2 * 512 = 2^14 * 2*9 = 8MB 
+    unsigned int third_index_addr; //(512/4)^3 * 512 = 2^14 * 2*9 = 1G
 };
 
 struct dinode {
@@ -136,9 +139,9 @@ extern unsigned int home_ino;  //根目录的inode
 extern map<unsigned int, struct inode> inode_o;       // inode打开表
 extern map<string, unsigned int> dir_list;            //当前目录表
 extern map<unsigned int, struct inode *> inode_sys_o; // inode 系统打开表
-extern map<unsigned int, struct inode *> inode_user_o; // inode 打开表(用户文件打开表)
-//TODO 切换用户时,文件打开表怎么办?
-
+extern map<unsigned int, struct inode *>
+    inode_user_o; // inode 打开表(用户文件打开表)
+// TODO 切换用户时,文件打开表怎么办?
 
 // 函数声明
 void format(virtualDisk &vD);
@@ -158,5 +161,14 @@ void ifree(struct inode *temp);
 struct inode *ialloc();
 
 int access();
+
+void open_file(string file_name);
+void create_file(string file_name);
+void write_file(string file_name);
+void read_file(string file_name);
+void delete_file(string file_name);
+void close_file(string file_name);
+
+void close_sys();
 
 #endif

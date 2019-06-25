@@ -208,7 +208,13 @@ void write_file(string file_name) {
         if (block_num <= 10)
             last_block = file_inode->di_addr[block_num - 1];
         else {
-            // TODO 多级索引
+
+            unsigned int temp_addr[BLOCKSIZ / 4];
+
+            //读索引块
+            vD.readBlock(file_inode->first_index_addr, &temp_addr);
+
+            last_block = temp_addr[block_num - 10 - 1];
         }
 
         if (text_length <= last_block_remain) {
@@ -227,7 +233,7 @@ void write_file(string file_name) {
             //还需再分配多少块
             //（没写进去的－已经写进去的）／每块大小 + (取余为0加0 取余为1加1)
             int new_block_num = (text_length - last_block_remain) / BLOCKSIZ + (1:0?(text_length - last_block_remain)%BLOCKSIZ);
-            
+
             //填写再分配的这些块
             for (int i = 0; i < new_block_num; i++) {
 
@@ -242,19 +248,58 @@ void write_file(string file_name) {
                     cout << "BLOCK 分配失败" << endl;
                     return;
                 }
-                strcpy(temp_text, text_buf, last_block_remain + i * BLOCKSIZ,
-                       BLOCKSIZ);
-                vD.writeBlock(addr, &temp_text);
 
-                //分配完后还＜＝10,正确
                 if (block_num <= 10) {
                     file_inode->di_addr[block_num - 1] = addr;
+                    strcpy(temp_text, text_buf,
+                           last_block_remain + i * BLOCKSIZ, BLOCKSIZ);
+                    vD.writeBlock(addr, &temp_text);
                 } else {
-                    // TODO 多级索引
+
+                    unsigned int temp_addr[BLOCKSIZ / 4];
+
+                    if (block_num == 11) {
+
+                        //上面分配的addr就是索引块
+                        unsigned int index_addr = addr;
+                        file_inode->first_index_addr = addr;
+
+                        //为数据申请一个新地址
+                        addr = balloc();
+                        if (addr == -1) {
+                            cout << "BLOCK 分配失败" << endl;
+                            //既然数据分配失败了,改回索引块
+                            file_inode->first_index_addr = 0;
+                            return;
+                        }
+
+                        //写数据
+                        strcpy(temp_text, text_buf,
+                               last_block_remain + i * BLOCKSIZ, BLOCKSIZ);
+                        vD.writeBlock(addr, &temp_text);
+
+                        //更新索引块
+                        temp_addr[block_num - 10 - 1] = addr;
+                        vD.writeBlock(index_addr, &temp_addr);
+                    } else {
+
+                        //写数据
+                        strcpy(temp_text, text_buf,
+                               last_block_remain + i * BLOCKSIZ, BLOCKSIZ);
+                        vD.writeBlock(addr, &temp_text);
+
+                        //读索引块
+                        vD.readBlock(file_inode->first_index_addr, &temp_addr);
+
+                        //更新索引块
+                        temp_addr[block_num - 10 - 1] = addr;
+                        vD.writeBlock(ile_inode->first_index_addr, &temp_addr)
+                    }
                 }
             }
         }
 
+        //修改inode中的相关值
         file_inode->size += text_length;
 
         // iput时更新inode即可,此处不用更新
@@ -273,7 +318,7 @@ void write_file(string file_name) {
     }
 }
 
-void read_file() {
+void read_file(string file_name) {
 
     //在当前目录表中查找此文件
     int file_inode_no;
@@ -309,16 +354,45 @@ void read_file() {
             ? file_inode->di_size % BLOCKSIZ);
         if (block_num <= 10) {
             for (int i = 0; i < block_num; i++) {
-                unsigned int addr = file_inode->di_addr[block_num - 1];
+                unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
 
-                //TODO 此处读一整块会不会出问题? 考虑之前残留的数据
+                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
+                // 之前残留的数据?
+                // TODO 需要读指定位置?
                 vD.readBlock(addr, &temp_text);
                 cout << temp_text;
             }
             cout << "#" << endl;
+        } else {
+            //从上面抄下来的,记得一起改
+            for (int i = 0; i < 10; i++) {
+                unsigned int addr = file_inode->di_addr[i];
+                char temp_text[BLOCKSIZ];
+
+                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
+                // 之前残留的数据?
+                // TODO 需要读指定位置?
+                vD.readBlock(addr, &temp_text);
+                cout << temp_text;
+            }
+
+            unsigned int temp_addr[BLOCKSIZ / 4];
+            vD.readBlock(file_inode->first_index_addr, &temp_addr);
+
+            for (int i = 0; i < block_num - 10; i++) {
+                unsigned int addr = temp_addr[i];
+                
+                //从上面抄下来的,记得一起改
+                char temp_text[BLOCKSIZ];
+
+                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
+                // 之前残留的数据?
+                // TODO 需要读指定位置?
+                vD.readBlock(addr, &temp_text);
+                cout << temp_text;
+            }
         }
-        // TODO 多级索引
 
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
@@ -380,7 +454,16 @@ void delete_file(string file_name) {
                     bfree(file_inode->di_addr[i]);
                 }
             }
-            // TODO 多级索引
+            else{
+                for (int i = 0; i < 10; i++) {
+                    bfree(file_inode->di_addr[i]);
+                }
+                unsigned int temp_addr[BLOCKSIZ / 4];
+                vD.readBlock(file_inode->first_index_addr, &temp_addr);
+                for(int i=0;i<block_num-10;i++){
+                    bfree(temp_addr[i]);
+                }
+            }
 
             //释放inode
             iput(file_inode->i_ino);

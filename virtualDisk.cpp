@@ -34,6 +34,7 @@ bool virtualDisk::readBlock(int blockPosition,void* target){//读取块
     //return blockRead;
 	return true;
 }
+
 bool virtualDisk::writeBlock(int blockPosition,void* blockSource){//写入块
 	curDisk.clear();
     curDisk.seekp(blockPosition,ios::beg);

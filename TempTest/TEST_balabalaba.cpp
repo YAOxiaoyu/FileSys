@@ -4,6 +4,13 @@
 
 using namespace std;
 
+void test(void *p, int size) {
+    for (int i = 0; i < size; i++) {
+        *(char*)p = 'a';
+        p++;
+    }
+}
+
 int main() {
     char s[10] = "";
     string ss = "12345";
@@ -14,8 +21,17 @@ int main() {
     string sss;
     sss.assign(a);
     cout << sss;
-}
 
+    char b[10] = "abc\0d";
+    cout << endl;
+    cout << b << endl;
+
+    char c[10];
+    test(&c, 10);
+    cout << c << endl;
+
+    
+}
 
 //备份一下
 // FUCK 西湖的水我的泪

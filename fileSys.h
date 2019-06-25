@@ -167,6 +167,9 @@ void read_file(string file_name);
 void delete_file(string file_name);
 void close_file(string file_name);
 
+void write_f(string, void*, int);
+void read_f(string,void*, int);
+
 void close_sys();
 
 #endif

@@ -117,13 +117,17 @@ void create_file(string file_name) {
         //分配balloc
         file_inode->di_addr[0] = balloc();
 
-        //创建目录项 并修改相关值
+        //更新目录
+        // 1. 创建目录项 并修改相关值
         struct dir_item temp_dir;
         temp_dir.d_ino = file_inode->i_ino;
         strcpy(temp_dir.d_name, file_name.c_str());
 
-        //将目录项添加到当前目录中
+        // 2. 将目录项添加到当前目录中
         cur_dir.dir[cur_dir.size - 1] = temp_dir;
+
+        // 3. 更新当前dir_map
+        get_cur_dir();
 
         // iput时写回inode即可
 
@@ -275,7 +279,6 @@ void write_file(string file_name) {
                  << endl;
         }
 
-        
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
     }
@@ -320,11 +323,15 @@ void read_file(string file_name) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
 
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
                 vD.readBlock(addr, &temp_text);
+                if (i == block_num - 1) {
+                    int last_size =
+                        file_inode->di_size - (block_num - 1) * BLOCKSIZ;
+                    temp_text[last_size] = '\0';
+                }
+
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)) //清空
             }
             cout << "#" << endl;
         } else {
@@ -333,11 +340,10 @@ void read_file(string file_name) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
 
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
+                //前十块一定是读完一整块
                 vD.readBlock(addr, &temp_text);
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)) //清空
             }
 
             unsigned int temp_addr[BLOCKSIZ / 4];
@@ -349,10 +355,12 @@ void read_file(string file_name) {
                 //从上面抄下来的,记得一起改
                 char temp_text[BLOCKSIZ];
 
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
                 vD.readBlock(addr, &temp_text);
+                if (i == block_num - 1) {
+                    int last_size =
+                        file_inode->di_size - (block_num - 1) * BLOCKSIZ;
+                    temp_text[last_size] = '\0';
+                }
                 cout << temp_text;
             }
         }
@@ -388,11 +396,12 @@ void delete_file(string file_name) {
     // TODO 用户有删除权限
     if (access() == 0) {
 
-        //删除目录项
+        //更新目录:删除目录项和更新map
         for (int i = dir_item_no; i < cur_dir.size - 1; i++) {
             cur_dir.dir[i] = cur_dir.dir[i + 1];
         }
         cur_dir.size--;
+        get_cur_dir();
 
         //在系统打开表和用户打开表中删除该项
         if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {
@@ -482,3 +491,100 @@ void close_file(string file_name) {
     }
 }
 
+void write_f(string file_name, void *file_context, int size) {
+    //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
+
+    struct inode *file_inode = iget(dir_list.find(file_name));
+
+    int block_num = size / BLOCKSIZ; //不考虑最后一块
+    int last_block_size = size - block_num * BLOCKSIZ;
+
+    for (int i = 0; i < block_num + 1; i++) {
+
+        unsigned int offset = i * BLOCKSIZ;
+
+        if (i == block_num && last_block_size == 0)
+            break; //写完了,不用再写了
+
+        if (i < 10) {
+
+            //分配数据块
+            unsigned int addr = balloc();
+
+            //写数据
+            vD.writeBlock(addr, file_context + offset);
+
+            //修改inode
+            file_inode->di_addr[i] = addr;
+        } else {
+            if (i == 10) {
+
+                //分配索引块
+                unsigned int index_addr = balloc();
+
+                //分配数据块
+                unsigned int addr = balloc();
+
+                //写数据
+                vD.writeBlock(addr, file_context + offset);
+
+                //修改inode
+                unsigned int temp_addr[BLOCKSIZ / 4];
+                temp_addr[i - 10] = addr;
+                vD.writeBlock(index_addr, &temp_addr);
+                file_inode->first_index_addr = index_addr;
+            } else {
+                //无需分配索引块
+
+                //分配数据块
+                unsigned int addr = balloc();
+                if (addr == -1) {
+                    cout << "block分配失败" << endl;
+                    return;
+                }
+
+                //写数据
+                vD.writeBlock(addr, file_context + offset);
+
+                //读索引块
+                unsigned int temp_addr[BLOCKSIZ / 4];
+                vD.readBlock(file_inode->first_index_addr, &temp_addr);
+                temp_addr[i - 10] = addr;
+                vD.writeBlock(file_inode->first_index_addr, &temp_addr);
+            }
+        }
+    }
+
+    file_inode->di_size = size;
+}
+
+void read_f(string file_name, void *file_context, int size) {
+    //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
+
+    struct inode *file_inode = iget(dir_list.find(file_name));
+
+    int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
+            ? file_inode->di_size % BLOCKSIZ);
+    if (block_num <= 10) {
+
+        for (int i = 0; i < block_num; i++) {
+            unsigned int addr = file_inode->di_addr[i];
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+            //假如文件只有500KB,但读出的是512KB,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
+        }
+    } else {
+        //从上面抄下来的,记得一起改
+        for (int i = 0; i < 10; i++) {
+            unsigned int addr = file_inode->di_addr[i];
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+        }
+
+        unsigned int temp_addr[BLOCKSIZ / 4];
+        vD.readBlock(file_inode->first_index_addr, &temp_addr);
+
+        for (int i = 0; i < block_num - 10; i++) {
+            unsigned int addr = temp_addr[i];
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+        }
+    }
+}

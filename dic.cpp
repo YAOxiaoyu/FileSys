@@ -38,7 +38,7 @@ string split(string &s,char flag)
 void get_cur_dir(unsigned int inode_ino,int output=1)
 {
     //初次调用ls
-    if(dir_list.empty() ||dir_ino!=inode_ino)
+    if(dir_list.empty() || dir_ino!=inode_ino)
     {
     inode *cur;
     //cur=iget(inode_ino);

@@ -1,56 +1,54 @@
-#include "virtualDisk.h"
 #include "fileSys.h"
+#include "virtualDisk.h"
 using namespace std;
-void format(virtualDisk& vD) {
-	
-	for (int i = 0; i < DINODE_NUM; i++) {
-		super_block.binode_bitmap[i] = 0;
-	}
-	super_block.s_ninode = DINODE_NUM;
+void format(virtualDisk &vD) {
 
-	inode initInode[16];
-	inode *iInode=ialloc();//TODO: ¸ùÄ¿Â¼i½áµã
-	iInode->di_addr[0] = 33 * BLOCKSIZ;
-	iInode->di_size = DIRSIZ + 2;
-	iInode->di_mode = 0;
-	iInode->di_number = 1;
-	iInode->i_count = 0;
-	iInode->i_ino = 0;//?
-	initInode[0] = *iInode;
-	vD.writeBlock(2 * blockSize,initInode);
-	dir_item iDir[16];//¸ùÄ¿Â¼
-	iDir[0].d_name[0] = '.';
-	iDir[0].d_ino = 0;
-	vD.writeBlock(33 * blockSize, iDir);
+    for (int i = 0; i < DINODE_NUM; i++) {
+        super_block.binode_bitmap[i] = 0;
+    }
+    super_block.s_ninode = DINODE_NUM;
 
+    inode initInode[16];
+    inode *iInode = ialloc(); // TODO: æ ¹ç›®å½•iç»“ç‚¹
+    iInode->di_addr[0] = 33 * BLOCKSIZ;
+    iInode->di_size = DIRSIZ + 2;
+    iInode->di_mode = 0;
+    iInode->di_number = 1;
+    iInode->i_count = 0;
+    iInode->i_ino = 0; //?
+    initInode[0] = *iInode;
+    vD.writeBlock(2 * blockSize, initInode);
+    dir_item iDir[16]; //æ ¹ç›®å½•
+    iDir[0].d_name[0] = '.';
+    iDir[0].d_ino = 0;
+    vD.writeBlock(33 * blockSize, iDir);
 
-	/*³¬¼¶¿é³õÊ¼»¯*/
-	int free_dblock = ALLBLOCKNUM - (2 + DINODEBLK);
-	super_block.s_nfree = free_dblock - (free_dblock % 50 + 1);
-	super_block.s_pfree = NICFREE - 1; // ¶ÑÕ»Ö¸Õë
+    /*è¶…çº§å—åˆå§‹åŒ–*/
+    int free_dblock = ALLBLOCKNUM - (2 + DINODEBLK);
+    super_block.s_nfree = free_dblock - (free_dblock % 50 + 1);
+    super_block.s_pfree = NICFREE - 1; // å †æ ˆæŒ‡é’ˆ
 
-	for (int i = free_dblock / NICFREE; i > 0; i--) {
-		if (i == free_dblock / NICFREE) {
-			super_block.s_free[0] = 0;
-		}
-		else {
-			super_block.s_free[0] = DATASTART + (i * NICFREE - 1) * BLOCKSIZ;
-		}
-		for (int j = 1; j < NICFREE + 1; j++) {
-			super_block.s_free[j] =
-				DATASTART + (i * NICFREE - (j + 1)) * BLOCKSIZ;
-		}
-		if (i == 1) {
-			//Ö»Ðè¼ÇÂ¼ÔÚ³¬¼¶¿éÖÐ¼´¿É
-			for (int m = 0; m < 1; m++)
-				balloc();
-		}
-		else {
-			//Ð´µ½ DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
-			vD.writeBlock(blockSize, &super_block);//Ð´»ØÐéÄâÅÌ
-			vD.writeBack();
-		}
-	}
-
-	vD.writeBack();
+    for (int i = free_dblock / NICFREE; i > 0; i--) {
+        if (i == free_dblock / NICFREE) {
+            super_block.s_free[0] = 0;
+        } else {
+            super_block.s_free[0] = DATASTART + (i * NICFREE - 1) * BLOCKSIZ;
+        }
+        for (int j = 1; j < NICFREE + 1; j++) {
+            super_block.s_free[j] =
+                DATASTART + (i * NICFREE - (j + 1)) * BLOCKSIZ;
+        }
+        if (i == 1) {
+            //åªéœ€è®°å½•åœ¨è¶…çº§å—ä¸­å³å¯
+            for (int m = 0; m < 1; m++)
+                balloc();
+        } else {
+            //å†™åˆ° DATASTART + ((i-1) * NICFREE-1) * BLOCKSIZ
+            vD.writeBlock(DATASTART + ((i - 1) * NICFREE - 1) * BLOCKSIZ,
+                          &super_block); //å†™å›žè™šæ‹Ÿç›˜
+            vD.writeBack();
+        }
+    }
+    vD.writeBlock(blockSize, &super_block);
+    vD.writeBack();
 }

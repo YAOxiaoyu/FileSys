@@ -21,6 +21,7 @@ public:
 	void writeBack();//写回物理磁盘
     bool readBlock(int,void*);//读取块
     bool writeBlock(int,void*);//写入块
+    bool writeAAddr(int,int,void*);//在特定地址处写
 };
 
 #endif

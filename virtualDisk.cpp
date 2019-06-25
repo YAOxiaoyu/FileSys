@@ -34,10 +34,18 @@ bool virtualDisk::readBlock(int blockPosition,void* target){//读取块
     //return blockRead;
 	return true;
 }
+
 bool virtualDisk::writeBlock(int blockPosition,void* blockSource){//写入块
 	curDisk.clear();
     curDisk.seekp(blockPosition,ios::beg);
 	//可能越界
     curDisk.write((char*)blockSource,blockSize);
+	return true;
+}
+bool virtualDisk::writeAAddr(int blockPosition,int fileSize,void* blockSource) {
+    curDisk.clear();
+    curDisk.seekp(blockPosition,ios::beg);
+	//可能越界
+    curDisk.write((char*)blockSource,fileSize);
 	return true;
 }

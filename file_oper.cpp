@@ -79,11 +79,6 @@ void create_file(string file_name) {
             cout << "该文件已经存在,请勿重复创建" << endl;
             break;
         }
-        // if (i == cur_dir.size - 1) {
-        //     //说明没找到
-        //     cout << "当前目录下不存在该文件,请输入正确的名字" << endl;
-        //     return;
-        // }
     }
 
     struct inode *file_inode;

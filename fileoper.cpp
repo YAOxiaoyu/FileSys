@@ -44,11 +44,14 @@ void open_file(string file_name) {
     if (access() == 0) {
 
         //在用户文件打开表中添加该inode
-        inode_user_o[file_inode_no] = *file_inode;
+        inode_user_o[file_inode_no] = file_inode;
 
-        //如果在系统文件打开表中也已经存在此项
-        if (inode_o.find(file_inode_no) != inode_o.end()) {
-            inode_o[file_inode_no].i_count++;
+        if (inode_sys_o.find(file_inode_no) != inode_sys_o.end()) {
+            //如果在系统文件打开表中也已经存在此项
+            file_inode->i_count++;
+        } else {
+            //为打开
+            inode_sys_o[file_inode_no] = file_inode;
         }
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
@@ -127,9 +130,13 @@ void create_file(string file_name) {
         //将目录项添加到当前目录中
         cur_dir.dir[cur_dir.size - 1] = temp_dir;
 
-        // TODO 更新inode
-        // TODO 更新目录项
-        // TODO 更新超级块
+        // iput时写回inode即可
+
+        // cd目录时 写回目录即可
+
+        // 0号块闲置,1号块为超级快,地址刚好为BLOCKSIZ
+        vD.writeBlock(BLOCKSIZ, &super_block);
+
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
     }
@@ -163,7 +170,7 @@ void write_file(string file_name) {
         open_file(file_name);
     }
 
-    struct inode *file_inode = &inode_user_o[file_inode_no];
+    struct inode *file_inode = inode_user_o[file_inode_no];
 
     // TODO 写权限
     if (access() == 0) {
@@ -206,11 +213,8 @@ void write_file(string file_name) {
 
         if (text_length <= last_block_remain) {
             //无需再重新分配
-            if (block_num <= 10) {
-                vD.writeAAddr(last_block + last_block_used, text_length,
-                              &text_buf);
-            }
-            // TODO 多级索引
+
+            vD.writeAAddr(last_block + last_block_used, text_length, &text_buf);
         } else {
             //当前空间不足,需要再重新分配block
 
@@ -223,6 +227,8 @@ void write_file(string file_name) {
             //还需再分配多少块
             //（没写进去的－已经写进去的）／每块大小 + (取余为0加0 取余为1加1)
             int new_block_num = (text_length - last_block_remain) / BLOCKSIZ + (1:0?(text_length - last_block_remain)%BLOCKSIZ);
+            
+            //填写再分配的这些块
             for (int i = 0; i < new_block_num; i++) {
 
                 if (block_num++ = NADDR) {
@@ -236,7 +242,6 @@ void write_file(string file_name) {
                     cout << "BLOCK 分配失败" << endl;
                     return;
                 }
-
                 strcpy(temp_text, text_buf, last_block_remain + i * BLOCKSIZ,
                        BLOCKSIZ);
                 vD.writeBlock(addr, &temp_text);
@@ -251,8 +256,13 @@ void write_file(string file_name) {
         }
 
         file_inode->size += text_length;
-        // TODO 更新inode
 
+        // iput时更新inode即可,此处不用更新
+
+        //更新超级块
+        vD.writeBlock(BLOCKSIZ, &super_block);
+
+        //若最大长度了,保存后给出提示
         if (is_max == true) {
             cout << "对不起,文件已达最大长度,系统已为您保存您输入的内容"
                  << endl;
@@ -301,6 +311,8 @@ void read_file() {
             for (int i = 0; i < block_num; i++) {
                 unsigned int addr = file_inode->di_addr[block_num - 1];
                 char temp_text[BLOCKSIZ];
+
+                //TODO 此处读一整块会不会出问题? 考虑之前残留的数据
                 vD.readBlock(addr, &temp_text);
                 cout << temp_text;
             }
@@ -346,8 +358,8 @@ void delete_file(string file_name) {
         cur_dir.size--;
 
         //在系统打开表和用户打开表中删除该项
-        if (inode_o.find(file_inode->i_ino) != inode_o.end()) {
-            inode_o.erase(inode_o.find(file_inode->i_ino));
+        if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {
+            inode_sys_o.erase(inode_sys_o.find(file_inode->i_ino));
         }
         if (inode_user_o.find(file_inode->i_ino) != inode_user_o.end()) {
             inode_user_o.erase(inode_user_o.find(file_inode->i_ino));
@@ -374,8 +386,9 @@ void delete_file(string file_name) {
             iput(file_inode->i_ino);
             ifree(file_inode);
 
-            // TODO 更新超级块
-            // TODO 更新目录
+            // cd切换目录时更新即可
+
+            vD.writeBlock(BLOCKSIZ, &super_block);
         }
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
@@ -417,10 +430,9 @@ void close_file(string file_name) {
     if (file_inode->i_count > 1) {
         file_inode->i_count--;
         //更新系统打开表
-        inode_o[file_inode->i_ino].i_count--;
-    }
-    else{
-        inode_o.erase(inode_o.find(file_inode_no));
+        inode_sys_o[file_inode->i_ino]->i_count--;
+    } else {
+        inode_sys_o.erase(inode_sys_o.find(file_inode_no));
         iput(file_inode->i_ino);
     }
 }

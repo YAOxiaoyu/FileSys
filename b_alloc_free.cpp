@@ -53,7 +53,7 @@ unsigned int balloc() {
             struct super_block temp_block;
             vD.readBlock(super_block.s_free[super_block.s_pfree], &temp_block);
             for (int i = 0; i < NICFREE; i++) {
-                super_block.s_nfree[i] = temp_block.s_nfree[i];
+                super_block.s_free[i] = temp_block.s_free[i];
             }
 
             super_block.s_pfree = NICFREE - 1;
@@ -83,7 +83,7 @@ void bfree(unsigned int block_addr) {
 
         // TODO 写回block_addr
         // 写回到 block_addr
-        vD.writeBlock(block_addr, %super_block);
+        vD.writeBlock(block_addr, &super_block);
 
         super_block.s_pfree = 0;
         super_block.s_free[super_block.s_pfree] = block_addr;

@@ -12,7 +12,7 @@ void open_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -61,7 +61,7 @@ void open_file(string file_name) {
 
 void create_file(string file_name) {
 
-    if (size(file_name) >= NAMESIZ) {
+    if (sizeof(file_name) >= NAMESIZ) {
         cout << "对不起,文件名过长" << endl;
         return;
     }
@@ -71,7 +71,7 @@ void create_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -117,13 +117,18 @@ void create_file(string file_name) {
         //分配balloc
         file_inode->di_addr[0] = balloc();
 
-        //创建目录项 并修改相关值
+        //更新目录
+        // 1. 创建目录项 并修改相关值
         struct dir_item temp_dir;
         temp_dir.d_ino = file_inode->i_ino;
         strcpy(temp_dir.d_name, file_name.c_str());
 
-        //将目录项添加到当前目录中
+        // 2. 将目录项添加到当前目录中
         cur_dir.dir[cur_dir.size - 1] = temp_dir;
+
+        // 3. 更新当前dir_map
+        // !!! 什么意思???? 下面这一行
+        // get_cur_dir();
 
         // iput时写回inode即可
 
@@ -144,7 +149,7 @@ void write_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -183,7 +188,7 @@ void write_file(string file_name) {
         int text_length = 0;
         bool is_max = false;
         char c;
-        while ((c = getchar()) != "#") {
+        while ((c = getchar()) != '#') {
             if (text_length >= max_size) {
                 is_max = true;
                 break;
@@ -201,9 +206,10 @@ void write_file(string file_name) {
                 if (last_block_size == 0)
                     break;
                 else
-                    strcpy(temp_text, text_buf, i * BLOCKSIZ, last_block_size);
+                    strncpy(temp_text, text_buf + i * BLOCKSIZ,
+                            last_block_size);
             } else {
-                strcpy(temp_text, text_buf, i * BLOCKSIZ, BLOCKSIZ);
+                strncpy(temp_text, text_buf + i * BLOCKSIZ, BLOCKSIZ);
             }
 
             if (i < 10) {
@@ -275,7 +281,6 @@ void write_file(string file_name) {
                  << endl;
         }
 
-        
     } else {
         cout << "对不起,您无权限执行此操作" << endl;
     }
@@ -283,12 +288,18 @@ void write_file(string file_name) {
 
 void read_file(string file_name) {
 
+    // TODO 多级目录正则
+    //保存当前目录名
+    // string cur_path;
+    // cur_path.assign(cur_dir.dir[1].d_name);
+    //解析file_name
+
     //在当前目录表中查找此文件
     int file_inode_no;
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -313,31 +324,33 @@ void read_file(string file_name) {
     if (access() == 0) {
 
         system("clear");
-        int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
-            ? file_inode->di_size % BLOCKSIZ);
+        int block_num = file_inode->di_size / BLOCKSIZ +
+                        ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
         if (block_num <= 10) {
             for (int i = 0; i < block_num; i++) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
-
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
                 vD.readBlock(addr, &temp_text);
+
+                if (i == block_num - 1) {
+                    int last_size =
+                        file_inode->di_size - (block_num - 1) * BLOCKSIZ;
+                    temp_text[last_size] = '\0';
+                }
+
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
             cout << "#" << endl;
         } else {
-            //从上面抄下来的,记得一起改
             for (int i = 0; i < 10; i++) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
 
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
+                //前十块一定是读完一整块
                 vD.readBlock(addr, &temp_text);
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
 
             unsigned int temp_addr[BLOCKSIZ / 4];
@@ -346,14 +359,16 @@ void read_file(string file_name) {
             for (int i = 0; i < block_num - 10; i++) {
                 unsigned int addr = temp_addr[i];
 
-                //从上面抄下来的,记得一起改
                 char temp_text[BLOCKSIZ];
 
-                // TODO 此处读一整块会不会出问题?  如果是占用的删除的文件的块
-                // 之前残留的数据?
-                // TODO 需要读指定位置?
                 vD.readBlock(addr, &temp_text);
+                if (i == block_num - 1) {
+                    int last_size =
+                        file_inode->di_size - (block_num - 1) * BLOCKSIZ;
+                    temp_text[last_size] = '\0';
+                }
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
         }
 
@@ -369,7 +384,7 @@ void delete_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -388,12 +403,17 @@ void delete_file(string file_name) {
     // TODO 用户有删除权限
     if (access() == 0) {
 
-        //删除目录项
+        //更新目录:删除目录项和更新map
         for (int i = dir_item_no; i < cur_dir.size - 1; i++) {
             cur_dir.dir[i] = cur_dir.dir[i + 1];
         }
         cur_dir.size--;
 		
+
+
+        //更新 map
+        // !!! ???? 这里要怎么做哦?
+        //update_cur_dir_map();
 
         //在系统打开表和用户打开表中删除该项
         if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {
@@ -410,8 +430,8 @@ void delete_file(string file_name) {
 
             //释放block
             //计算当前文件占了几个block
-            int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
-                ? file_inode->di_size % BLOCKSIZ);
+            int block_num = file_inode->di_size / BLOCKSIZ +
+                            ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
             if (block_num <= 10) {
                 //先不考虑三级索引
                 for (int i = 0; i < block_num; i++) {
@@ -430,7 +450,7 @@ void delete_file(string file_name) {
 
             //释放inode
             iput(file_inode->i_ino);
-            ifree(file_inode);
+            ifree(file_inode->i_ino);
 
             // cd切换目录时更新即可
 
@@ -447,7 +467,7 @@ void close_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -483,3 +503,117 @@ void close_file(string file_name) {
     }
 }
 
+void write_f(string file_name, void *file_context, int size,
+             unsigned int inode_number) {
+    //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
+
+    struct inode *file_inode;
+
+    if (inode_number == 0)
+        file_inode = iget(dir_list[file_name]);
+    else {
+        //参数中的file_name = ""
+        file_inode = iget(inode_number);
+    }
+
+    int block_num = size / BLOCKSIZ; //不考虑最后一块
+    int last_block_size = size - block_num * BLOCKSIZ;
+
+    for (int i = 0; i < block_num + 1; i++) {
+
+        unsigned int offset = i * BLOCKSIZ;
+
+        if (i == block_num && last_block_size == 0)
+            break; //写完了,不用再写了
+
+        if (i < 10) {
+
+            //分配数据块
+            unsigned int addr = balloc();
+
+            //写数据
+            vD.writeBlock(addr, file_context + offset);
+
+            //修改inode
+            file_inode->di_addr[i] = addr;
+        } else {
+            if (i == 10) {
+
+                //分配索引块
+                unsigned int index_addr = balloc();
+
+                //分配数据块
+                unsigned int addr = balloc();
+
+                //写数据
+                vD.writeBlock(addr, file_context + offset);
+
+                //修改inode
+                unsigned int temp_addr[BLOCKSIZ / 4];
+                temp_addr[i - 10] = addr;
+                vD.writeBlock(index_addr, &temp_addr);
+                file_inode->first_index_addr = index_addr;
+            } else {
+                //无需分配索引块
+
+                //分配数据块
+                unsigned int addr = balloc();
+                if (addr == -1) {
+                    cout << "block分配失败" << endl;
+                    return;
+                }
+
+                //写数据
+                vD.writeBlock(addr, file_context + offset);
+
+                //读索引块
+                unsigned int temp_addr[BLOCKSIZ / 4];
+                vD.readBlock(file_inode->first_index_addr, &temp_addr);
+                temp_addr[i - 10] = addr;
+                vD.writeBlock(file_inode->first_index_addr, &temp_addr);
+            }
+        }
+    }
+
+    file_inode->di_size = size;
+}
+
+unsigned int read_f(string file_name, void *file_context,
+                    unsigned int inode_number = 0) {
+    //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
+
+    struct inode *file_inode;
+
+    if (inode_number == 0)
+        file_inode = iget(dir_list[file_name]);
+    else {
+        //参数中的file_name = ""
+        file_inode = iget(inode_number);
+    }
+
+    int block_num = file_inode->di_size / BLOCKSIZ +
+                    ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
+    if (block_num <= 10) {
+        for (int i = 0; i < block_num; i++) {
+            unsigned int addr = file_inode->di_addr[i];
+
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+            //假如文件只有500B,但读出的是512B,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
+        }
+    } else {
+        for (int i = 0; i < 10; i++) {
+            unsigned int addr = file_inode->di_addr[i];
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+        }
+
+        unsigned int temp_addr[BLOCKSIZ / 4];
+        vD.readBlock(file_inode->first_index_addr, &temp_addr);
+
+        for (int i = 0; i < block_num - 10; i++) {
+            unsigned int addr = temp_addr[i];
+            vD.readBlock(addr, file_context + i * BLOCKSIZ);
+        }
+    }
+
+    return file_inode->di_size;
+}

@@ -4,18 +4,49 @@
 
 using namespace std;
 
+char stor[100];
+
+void read_(void *p, int size) {
+    for (int i = 0; i < size; i++) {
+        *((char *)p + i) = *(stor + i);
+    }
+    for (int i = size; i < size+4; i++) {
+        *((char *)p + i) = *(stor + i);
+    }
+}
+
+void write_(void *p, int size) {
+    for (int i = 0; i < size; i++) {
+        *(stor + i) = *((char *)p + i);
+    }
+    for (int i = size; i < size + 4; i++) {
+        *(stor + i) = 'a';
+    }
+}
+
 int main() {
     char s[10] = "";
     string ss = "12345";
     strcpy(s, ss.c_str());
     cout << s;
 
-    char a[10] = "abcde";
+    char aa[10] = "abcde";
     string sss;
-    sss.assign(a);
+    sss.assign(aa);
     cout << sss;
-}
+    cout << endl;
 
+    int a = 4, b;
+    write_(&a, sizeof(a));
+    read_(&b, sizeof(b));
+    cout << b << endl;
+
+    char text[100];
+    char c;
+    while((c = getchar()) != '#') {
+
+    }
+}
 
 //备份一下
 // FUCK 西湖的水我的泪

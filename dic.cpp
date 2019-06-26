@@ -3,16 +3,16 @@
 #include<string>
 #include<string.h>
 
-struct dir cur_dir;
-unsigned int home_ino;
-unsigned int dir_ino;
-unsigned int inode_ino;
-string cur_dir_name;
+// struct dir cur_dir;
+// unsigned int home_ino;
+// unsigned int dir_ino;
+// unsigned int inode_ino;
+// string cur_dir_name;
 
 
-map<unsigned int,struct inode>file_open;
-map<string,unsigned int>dir_list;
-map<unsigned int,struct inode>inode_o;
+// map<unsigned int,struct inode>file_open;
+// map<string,unsigned int>dir_list;
+// map<unsigned int,struct inode>inode_o;
 
 string split(string &s,char flag)
 {
@@ -139,7 +139,7 @@ void get_dir(string path)
     {
         cur_dir_name=path_now;
         //添加到文件打开表
-        file_open[inode_ino_now]=*temp;
+        inode_sys_o[inode_ino_now]=temp;
 
         //目录信息写回磁盘
         dir_item *tem_dir=new dir_item[cur_dir.size];

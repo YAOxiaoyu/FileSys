@@ -140,10 +140,12 @@ extern unsigned int inode_data_start_block; //当前使用的Inode块的数据�
 extern unsigned int inode_ino; //当前inode ino
 extern unsigned int dir_ino;   //目录对应文件ino
 extern unsigned int home_ino;  //根目录的inode
+extern string cur_dir_name;
 
 //文件打开表
 extern map<unsigned int, struct inode> inode_o;       // inode打开表
 extern map<string, unsigned int> dir_list;            //当前目录表
+
 extern map<unsigned int, struct inode *> inode_sys_o; // inode 系统打开表
 extern map<unsigned int, struct inode *>
     inode_user_o; // inode 打开表(用户文件打开表) -> 当前用户打开表

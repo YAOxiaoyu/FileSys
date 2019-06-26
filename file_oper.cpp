@@ -41,7 +41,7 @@ void open_file(string file_name) {
     }
 
     // TODO 可访问权限
-    if (access() == 0) {
+    if (1) {
 
         //在用户文件打开表中添加该inode
         inode_user_o[file_inode_no] = file_inode;
@@ -84,7 +84,7 @@ void create_file(string file_name) {
     struct inode *file_inode;
 
     // TODO 在当前目录下可创建文件权限
-    if (access() == 0) {
+    if (1) {
 
         // //在当前目录表找一个空项
         // int dir_item_no;
@@ -173,7 +173,7 @@ void write_file(string file_name) {
     struct inode *file_inode = inode_user_o[file_inode_no];
 
     // TODO 写权限
-    if (access() == 0) {
+    if (1) {
 
         system("clear");
         read_file(file_name);
@@ -321,7 +321,7 @@ void read_file(string file_name) {
     struct inode *file_inode = inode_user_o[file_inode_no];
 
     // TODO 读权限
-    if (access() == 0) {
+    if (1) {
 
         system("clear");
         int block_num = file_inode->di_size / BLOCKSIZ +
@@ -401,7 +401,7 @@ void delete_file(string file_name) {
     struct inode *file_inode = iget(file_inode_no);
 
     // TODO 用户有删除权限
-    if (access() == 0) {
+    if (1) {
 
         //更新目录:删除目录项和更新map
         for (int i = dir_item_no; i < cur_dir.size - 1; i++) {

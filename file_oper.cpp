@@ -500,11 +500,13 @@ void write_f(string file_name, void *file_context, int size,
              unsigned int inode_number) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
+    struct inode *file_inode;
+
     if (inode_number == 0)
-        struct inode *file_inode = iget(dir_list.find(file_name));
+        file_inode = iget(dir_list[file_name]);
     else {
         //参数中的file_name = ""
-        struct inode *file_inode = iget(inode_number);
+        file_inode = iget(inode_number);
     }
 
     int block_num = size / BLOCKSIZ; //不考虑最后一块
@@ -569,15 +571,14 @@ void write_f(string file_name, void *file_context, int size,
     file_inode->di_size = size;
 }
 
-
 unsigned int read_f(string file_name, void *file_context,
-            unsigned int inode_number = 0) {
+                    unsigned int inode_number = 0) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
     struct inode *file_inode;
 
     if (inode_number == 0)
-        file_inode = iget(dir_list.find(file_name));
+        file_inode = iget(dir_list[file_name]);
     else {
         //参数中的file_name = ""
         file_inode = iget(inode_number);
@@ -590,8 +591,6 @@ unsigned int read_f(string file_name, void *file_context,
             unsigned int addr = file_inode->di_addr[i];
 
             vD.readBlock(addr, file_context + i * BLOCKSIZ);
-            
-            
             //假如文件只有500B,但读出的是512B,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
         }
     } else {

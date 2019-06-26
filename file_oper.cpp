@@ -393,6 +393,7 @@ void delete_file(string file_name) {
             cur_dir.dir[i] = cur_dir.dir[i + 1];
         }
         cur_dir.size--;
+		
 
         //在系统打开表和用户打开表中删除该项
         if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {

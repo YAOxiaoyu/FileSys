@@ -155,8 +155,8 @@ void format();
 unsigned int balloc();              //磁盘块分配函数
 void bfree(unsigned int block_num); //磁盘块释放函数
 
-void get_cur_dir(unsigned int inode_ino,
-                 int output = 1); //获取当前文件的目录表          //获取当前目录
+void get_cur_dir(unsigned int,
+                 int); //获取当前文件的目录表          //获取当前目录
 
 void mkdir(string new_name); //当前目录下创建新文件夹
 void get_dir(string path);   // 多级目录
@@ -175,8 +175,8 @@ void read_file(string file_name);
 void delete_file(string file_name);
 void close_file(string file_name);
 
-void write_f(string, void *, int);
-void read_f(string, void *, int);
+void write_f(string, void *, int, unsigned int);
+unsigned int read_f(string , void *,unsigned int);
 
 void close_sys();
 

@@ -83,7 +83,7 @@ void bfree(unsigned int block_addr) {
 
         // TODO 写回block_addr
         // 写回到 block_addr
-        vD.writeBlock(block_addr, %super_block);
+        vD.writeBlock(block_addr, &super_block);
 
         super_block.s_pfree = 0;
         super_block.s_free[super_block.s_pfree] = block_addr;

@@ -496,8 +496,7 @@ void close_file(string file_name) {
     }
 }
 
-void write_f(string file_name, void *file_context, int size,
-             unsigned int inode_number) {
+void write_f(string file_name, void *file_context, int size, unsigned int inode_number) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
     struct inode *file_inode;

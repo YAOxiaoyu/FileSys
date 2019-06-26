@@ -1,6 +1,7 @@
 #include"fileSys.h"
 #include<iostream>
 #include<string>
+#include<string.h>
 
 struct dir cur_dir;
 unsigned int home_ino;
@@ -31,7 +32,7 @@ string split(string &s,char flag)
     {
         return "";
     }
-    
+
 }
 
 //获取当前目录
@@ -48,7 +49,7 @@ void get_cur_dir(unsigned int inode_ino,int output=1)
         dir emppt_dir;
         cur_dir=emppt_dir;
         dir_list.clear();
-        
+
         inode *cur;
         //已经在内存中调用过
         if(inode_o.count(inode_ino))
@@ -62,7 +63,7 @@ void get_cur_dir(unsigned int inode_ino,int output=1)
         unsigned int dir_size;
         //根据inode_ino的地址索引找到目录地址，保存目录到cur_dir
         dir_item *tem_dir=new dir_item[DIRNUM];
-        dir_size=read_f("", void tem_dir,inode_ino);
+        dir_size=read_f("", &tem_dir,inode_ino);
         cur_dir.size=dir_size/sizeof(dir_item);
         for(int i=0;i<cur_dir.size;i++)
         {
@@ -71,10 +72,10 @@ void get_cur_dir(unsigned int inode_ino,int output=1)
             cur_dir.dir[i].d_ino=tem_dir[i].d_ino;
             cur_dir.dir[i].d_name=temp_name;
         }
-        
+
         delete[] tem_dir;
     }
-    
+
     //更新cur_dir 到dir_list
     for(int i=0;i<cur_dir.size;i++)
     {
@@ -120,7 +121,7 @@ void get_dir(string path)
         {
             cout<<"请输入正确路径"<<endl;
         }
-        
+
     }
     //调用
     if(inode_o.count(inode_ino_now))
@@ -131,7 +132,7 @@ void get_dir(string path)
     {
         temp=iget(inode_ino_now);
     }
-    
+
     //判断是否是文件
     if(temp->i_flag==0)
     {
@@ -147,7 +148,7 @@ void get_dir(string path)
             strcpy(tem_dir[i].d_name,cur_dir_name);
         }
         write_f("",tem_dir,cur_dir.size*sizeof(dir_item),inode_ino);
-        
+
         delete[] tem_dir;
         //更新dir_list cur_dir
         //更新inode
@@ -163,7 +164,7 @@ void get_dir(string path)
     {
         cout<<path_now+" 不是一个文件夹"<<endl;
     }
-    
+
 }
 //当前目录下生成新文件夹
 void mkdir(string new_name)
@@ -178,7 +179,7 @@ void mkdir(string new_name)
     for(int i=0; i<new_name.length(); i++) //string => char[]
     {
        new_item.d_name[i] = new_name[i];
-    }    
+    }
     inode *temp=ialloc();
     unsigned int new_inode_ino=temp->i_ino;
     dir_list[new_name]=new_inode_ino;
@@ -189,7 +190,7 @@ void mkdir(string new_name)
     strcpy(new_dir[0].d_name,"..");
     new_dir[1].d_ino=new_inode_ino;
     strcpy(new_dir[1].d_name,".");
-    
+
     //TODO:写回磁盘
     int block=balloc();
     fseek(fd,DATASTART+block*BLOCKSIZ,SEEK_SET);
@@ -199,7 +200,7 @@ void mkdir(string new_name)
     temp->di_size=2*sizeof(dir_item);
     iput(temp->i_ino);
 
-    
+
     cur_dir.size+=1;
     cur_dir.dir[cur_dir.size]=new_item;
 }

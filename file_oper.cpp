@@ -142,7 +142,6 @@ void create_file(string file_name) {
 }
 
 void write_file(string file_name) {
-    
 
     //在当前目录表中查找此文件
     int file_inode_no;
@@ -287,12 +286,11 @@ void write_file(string file_name) {
 
 void read_file(string file_name) {
 
-    //TODO 多级目录正则
+    // TODO 多级目录正则
     //保存当前目录名
     // string cur_path;
     // cur_path.assign(cur_dir.dir[1].d_name);
     //解析file_name
-
 
     //在当前目录表中查找此文件
     int file_inode_no;
@@ -330,8 +328,8 @@ void read_file(string file_name) {
             for (int i = 0; i < block_num; i++) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
-
                 vD.readBlock(addr, &temp_text);
+
                 if (i == block_num - 1) {
                     int last_size =
                         file_inode->di_size - (block_num - 1) * BLOCKSIZ;
@@ -498,18 +496,16 @@ void close_file(string file_name) {
     }
 }
 
-void write_f(string file_name, void *file_context, int size) {
+void write_f(string file_name, void *file_context, int size,
+             unsigned int inode_number) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
-    /a/b/c/
-    /password
-    cd("..");
-    cd(..)
-    cd (..)
-    write_f(password)
-    write_f(/password)
-
-    struct inode *file_inode = iget(dir_list.find(file_name));
+    if (inode_number == 0)
+        struct inode *file_inode = iget(dir_list.find(file_name));
+    else {
+        //参数中的file_name = ""
+        struct inode *file_inode = iget(inode_number);
+    }
 
     int block_num = size / BLOCKSIZ; //不考虑最后一块
     int last_block_size = size - block_num * BLOCKSIZ;
@@ -573,19 +569,30 @@ void write_f(string file_name, void *file_context, int size) {
     file_inode->di_size = size;
 }
 
-void read_f(string file_name, void *file_context, int size) {
+
+unsigned int read_f(string file_name, void *file_context,
+            unsigned int inode_number = 0) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
-    struct inode *file_inode = iget(dir_list.find(file_name));
+    struct inode *file_inode;
+
+    if (inode_number == 0)
+        file_inode = iget(dir_list.find(file_name));
+    else {
+        //参数中的file_name = ""
+        file_inode = iget(inode_number);
+    }
 
     int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
             ? file_inode->di_size % BLOCKSIZ);
     if (block_num <= 10) {
-
         for (int i = 0; i < block_num; i++) {
             unsigned int addr = file_inode->di_addr[i];
+
             vD.readBlock(addr, file_context + i * BLOCKSIZ);
-            //假如文件只有500KB,但读出的是512KB,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
+            
+            
+            //假如文件只有500B,但读出的是512B,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
         }
     } else {
         for (int i = 0; i < 10; i++) {
@@ -601,4 +608,6 @@ void read_f(string file_name, void *file_context, int size) {
             vD.readBlock(addr, file_context + i * BLOCKSIZ);
         }
     }
+
+    return file_inode->di_size;
 }

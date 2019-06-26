@@ -10,11 +10,17 @@ void read_(void *p, int size) {
     for (int i = 0; i < size; i++) {
         *((char *)p + i) = *(stor + i);
     }
+    for (int i = size; i < size+4; i++) {
+        *((char *)p + i) = *(stor + i);
+    }
 }
 
 void write_(void *p, int size) {
     for (int i = 0; i < size; i++) {
         *(stor + i) = *((char *)p + i);
+    }
+    for (int i = size; i < size + 4; i++) {
+        *(stor + i) = 'a';
     }
 }
 

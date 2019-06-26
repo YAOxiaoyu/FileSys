@@ -5,7 +5,6 @@
 #include<conio.h>
 using namespace std;
 
-enum mode{READ,WRITE,X};
 bool login() {
 	//u_default_mode
 	struct user userLogging;
@@ -32,14 +31,22 @@ bool login() {
 	vector<struct user>::iterator findUser = userLogin.begin();
 	while (findUser!=userLogin.end()){
 		if (findUser->u_uid = userLogging.u_uid) {//ÒÑµÇÂ¼£¬ÇÐ»»ÓÃ»§
+			activeUser->u_ofile = inode_user_o;
+			activeUser = findUser.operator*;
+			inode_user_o = activeUser->u_ofile;
 			break;
 		}
 		findUser++;
 	}
 	if (findUser == userLogin.end()) {//Î´µÇÂ¼
 		userLogin.push_back(userLogging);
+		activeUser =&userLogin.back();
 	}
 	return true;
+}
+
+void deleteUser() {
+
 }
 
 void logout(struct user userQuit) {

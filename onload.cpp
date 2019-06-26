@@ -14,10 +14,10 @@ void onload() {
 	else {
 		viDisk.close();
 	}
-	activeUser.u_uid = 0000;
 	//读取用户表到user
 	//读取密码表到password
-	pwdNum = read_f("password",password);
+	pwdNum = read_f("password",password,0)/sizeof(struct password);
 	//superBlock
+	vD.readBlock(BLOCKSIZ, &super_block);
 	login();
 }

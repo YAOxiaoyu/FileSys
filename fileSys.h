@@ -144,7 +144,7 @@ extern struct password password[PWDNUM];
 /*用户*/
 extern vector<struct userListItem> userList;
 extern vector<struct user> userLogin;
-extern struct user activeUser;
+extern struct user* activeUser;
 extern int userNum;
 
 extern FILE *fd;

@@ -132,6 +132,8 @@ struct userListItem {
 	unsigned short gId;
 };
 
+enum mode { READ, WRITE, X };
+
 /*全局变量 */
 extern class virtualDisk vD;
 extern struct dir cur_dir;
@@ -196,5 +198,12 @@ void write_f(string, void *, int, unsigned int);
 unsigned int read_f(string , void *,unsigned int);
 
 void close_sys();
+
+bool login();
+void logout(struct user userQuit);
+void getPassword(char*password);
+void createUser(unsigned short uId, unsigned short gId);
+bool access(inode* inode, struct user* user, mode m);
+void onload();
 
 #endif

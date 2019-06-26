@@ -39,14 +39,9 @@ string split(string &s,char flag)
 //output默认为1，输出目录表
 void get_cur_dir(unsigned int inode_ino,int output=1)
 {
-<<<<<<< HEAD:dic.cpp
-    //初次调用ls
-    if(dir_list.empty() || dir_ino!=inode_ino)
-=======
     cout<<"当前目录："+cur_dir_name<<endl;
     cout<<"-----------------------------------------"<<endl;
     if(dir_ino!=inode_ino || dir_list.empty())
->>>>>>> f6b954e06ab914294a57ba4cec144995af5c3480:FileSys/dic.cpp
     {
         //清空目录表
         dir_ino=inode_ino;

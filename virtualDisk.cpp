@@ -23,6 +23,7 @@ void virtualDisk::newDisk(int size){//新建虚拟磁盘
         vDisk.write((char*)&initBlock,blockSize);
     }
     vDisk.close();
+	curDisk.open(virtualDName, ios::in | ios::out | ios::binary);
 }
 /*块编号应为块起始字节编号 */
 bool virtualDisk::readBlock(int blockPosition,void* target){//读取块

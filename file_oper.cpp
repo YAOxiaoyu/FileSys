@@ -322,8 +322,8 @@ void read_file(string file_name) {
     if (access() == 0) {
 
         system("clear");
-        int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
-            ? file_inode->di_size % BLOCKSIZ);
+        int block_num = file_inode->di_size / BLOCKSIZ +
+                        ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
         if (block_num <= 10) {
             for (int i = 0; i < block_num; i++) {
                 unsigned int addr = file_inode->di_addr[i];
@@ -423,8 +423,8 @@ void delete_file(string file_name) {
 
             //释放block
             //计算当前文件占了几个block
-            int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
-                ? file_inode->di_size % BLOCKSIZ);
+            int block_num = file_inode->di_size / BLOCKSIZ +
+                            ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
             if (block_num <= 10) {
                 //先不考虑三级索引
                 for (int i = 0; i < block_num; i++) {
@@ -584,8 +584,8 @@ unsigned int read_f(string file_name, void *file_context,
         file_inode = iget(inode_number);
     }
 
-    int block_num = file_inode->di_size / BLOCKSIZ + (1 : 0
-            ? file_inode->di_size % BLOCKSIZ);
+    int block_num = file_inode->di_size / BLOCKSIZ +
+                    ((file_inode->di_size % BLOCKSIZ) ? 1 : 0);
     if (block_num <= 10) {
         for (int i = 0; i < block_num; i++) {
             unsigned int addr = file_inode->di_addr[i];

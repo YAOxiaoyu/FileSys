@@ -122,16 +122,31 @@ struct user {
     unsigned short u_default_mode;
     unsigned short u_uid;
     unsigned short u_gid;
-    unsigned short u_ofile[NOFILE]; //用户打开文件表
+    map<unsigned int, struct inode *> u_ofile; //用户打开文件表
 };
+
+struct userListItem {
+    // char uName[20];
+    unsigned short uId;
+    unsigned short gId;
+};
+
+enum mode { READ, WRITE, X };
 
 /*全局变量 */
 extern class virtualDisk vD;
 extern struct dir cur_dir;
 extern struct file sys_ofile[SYSOPENFILE];
 extern struct super_block super_block;
+extern unsigned int pwdNum;
 extern struct password password[PWDNUM];
-extern struct user user[USERNUM];
+
+/*用户*/
+extern vector<struct userListItem> userList;
+extern vector<struct user> userLogin;
+extern struct user activeUser;
+extern int userNum;
+
 extern FILE *fd;
 extern struct inode *cur_path_node;
 extern int user_id, file_block;
@@ -180,5 +195,12 @@ void write_f(string, void *, int, unsigned int);
 unsigned int read_f(string, void *, unsigned int);
 
 void close_sys();
+
+bool login();
+void logout(struct user userQuit);
+void getPassword(char *password);
+void createUser(unsigned short uId, unsigned short gId);
+bool access(inode *inode, struct user *user, mode m);
+void onload();
 
 #endif

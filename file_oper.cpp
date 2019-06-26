@@ -407,6 +407,7 @@ void delete_file(string file_name) {
             cur_dir.dir[i] = cur_dir.dir[i + 1];
         }
         cur_dir.size--;
+		
 
 
         //更新 map

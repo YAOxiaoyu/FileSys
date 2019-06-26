@@ -90,7 +90,7 @@ void get_dir(string path) {
     string path_now = "";
     path_now = path;
     path_letf = split(path_now, '/');
-    if (path_now == "home") {
+    if (path_now == "root") {
         //从根目录开始查找
         inode_ino_now = home_ino;
         dir_ino = home_ino;

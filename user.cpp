@@ -16,7 +16,7 @@ bool login() {
 	for (i = 0; i < PWDNUM;i++) {//Æ¥ÅäÃÜÂë
 		if (password[i].p_uid = pLogging.p_uid) {
 			for (int j = 0; j < PWDSIZ; j++) {
-				if (password[i].password[i] != pLogging.password[i]) {
+				if (password[i].password[j] != pLogging.password[j]) {
 					cout << "password error!" << endl;
 					return false;
 				}
@@ -84,6 +84,7 @@ void getPassword(char *password) {
 			break;
 			//TODO:´íÎóÐÅÏ¢
 		}
+		c = getch();
 	}
 }
 
@@ -150,4 +151,30 @@ bool access(inode* inode,struct user* user,mode m) {
 			return true;
 	}
 	return false;
+}
+
+bool changePWD() {
+	struct password pLogging;
+	cout << "ÊäÈëÓÃ»§ID:";
+	cin>>pLogging.p_uid;
+	cout << endl << "¾ÉÃÜÂë:";
+	getPassword(pLogging.password);
+	int i;
+	for (i = 0; i < PWDNUM; i++) {//Æ¥ÅäÃÜÂë
+		if (password[i].p_uid = pLogging.p_uid) {
+			for (int j = 0; j < PWDSIZ; j++) {
+				if (password[i].password[j] != pLogging.password[j]) {
+					cout << "password error!" << endl;
+					return false;
+				}
+			}
+			break;
+		}
+	}
+	if (i == PWDNUM) {
+		return false;
+	}
+	cout << endl << "ÐÂÃÜÂë:";
+	getPassword(password[i].password);
+	return true;
 }

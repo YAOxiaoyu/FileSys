@@ -11,7 +11,7 @@ void format(virtualDisk &vD) {
     inode initInode[16];
     inode *iInode = ialloc(); // TODO: 根目录i结点
     iInode->di_addr[0] = 33 * BLOCKSIZ;
-    iInode->di_size = DIRSIZ + 2;
+    iInode->di_size = DIRSIZ;
     iInode->di_mode = 0;
     iInode->di_number = 1;
     iInode->i_count = 0;
@@ -49,6 +49,30 @@ void format(virtualDisk &vD) {
             vD.writeBack();
         }
     }
+	//根目录文件
+	struct password pRoot;
+	pRoot.p_uid = 0;
+	pRoot.P_gid = 0;
+	for (int i = 0; i < PWDSIZ; i++) {
+		pRoot.password[i] = '\0';
+	}
+	for (int i = 0; i < 4; i++) {//初始密码0123
+		pRoot.password[i] = i;
+	}
+	struct user userRoot;
+	userRoot.u_uid = 0;
+	userRoot.u_gid = 0;
+	userLogin.push_back(userRoot);
+	activeUser = &(userLogin.back());
+	inode_ino = 0;
+	home_ino = 0;
+	get_cur_dir(0);
+	cur_dir_name = "root";
+	pwdNum = 1;
+	mkdir("PWD");
+	get_dir("PWD");
+	create_file("password");
+	write_f("password", password, sizeof(struct password)*pwdNum,0);
     vD.writeBlock(blockSize, &super_block);
     vD.writeBack();
 }

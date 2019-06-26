@@ -40,6 +40,12 @@ int main() {
     write_(&a, sizeof(a));
     read_(&b, sizeof(b));
     cout << b << endl;
+
+    char text[100];
+    char c;
+    while((c = getchar()) != '#') {
+
+    }
 }
 
 //备份一下

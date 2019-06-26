@@ -163,7 +163,7 @@ void get_dir(string path);   // 多级目录
 
 inode *iget(unsigned int inode_id); //获取inode ino 对应inode节点
 void iput(unsigned int inode_id);
-void ifree(struct inode *temp);
+void ifree(unsigned int inode_id);
 struct inode *ialloc();
 
 int access();

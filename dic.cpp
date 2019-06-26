@@ -70,7 +70,8 @@ void get_cur_dir(unsigned int inode_ino,int output=1)
             string temp_name=tem_dir[i].d_name;
             dir_list[temp_name]=tem_dir[i].d_ino;
             cur_dir.dir[i].d_ino=tem_dir[i].d_ino;
-            cur_dir.dir[i].d_name=temp_name;
+            // cur_dir.dir[i].d_name=temp_name;
+            strcpy(cur_dir.dir[i].d_name, temp_name.c_str());
         }
 
         delete[] tem_dir;
@@ -145,7 +146,7 @@ void get_dir(string path)
         for(int i=0;i<cur_dir.size;i++)
         {
             tem_dir[i].d_ino=cur_dir.dir[i].d_ino;
-            strcpy(tem_dir[i].d_name,cur_dir_name);
+            strcpy(tem_dir[i].d_name,cur_dir_name.c_str());
         }
         write_f("",tem_dir,cur_dir.size*sizeof(dir_item),inode_ino);
 

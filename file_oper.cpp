@@ -61,7 +61,7 @@ void open_file(string file_name) {
 
 void create_file(string file_name) {
 
-    if (size(file_name) >= NAMESIZ) {
+    if (sizeof(file_name) >= NAMESIZ) {
         cout << "对不起,文件名过长" << endl;
         return;
     }
@@ -127,7 +127,8 @@ void create_file(string file_name) {
         cur_dir.dir[cur_dir.size - 1] = temp_dir;
 
         // 3. 更新当前dir_map
-        get_cur_dir();
+        // !!! 什么意思???? 下面这一行
+        // get_cur_dir();
 
         // iput时写回inode即可
 
@@ -187,7 +188,7 @@ void write_file(string file_name) {
         int text_length = 0;
         bool is_max = false;
         char c;
-        while ((c = getchar()) != "#") {
+        while ((c = getchar()) != '#') {
             if (text_length >= max_size) {
                 is_max = true;
                 break;
@@ -205,9 +206,10 @@ void write_file(string file_name) {
                 if (last_block_size == 0)
                     break;
                 else
-                    strcpy(temp_text, text_buf, i * BLOCKSIZ, last_block_size);
+                    strncpy(temp_text, text_buf + i * BLOCKSIZ,
+                            last_block_size);
             } else {
-                strcpy(temp_text, text_buf, i * BLOCKSIZ, BLOCKSIZ);
+                strncpy(temp_text, text_buf + i * BLOCKSIZ, BLOCKSIZ);
             }
 
             if (i < 10) {
@@ -337,7 +339,7 @@ void read_file(string file_name) {
                 }
 
                 cout << temp_text;
-                memset(temp_text, '\0', sizeof(temp_text)) //清空
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
             cout << "#" << endl;
         } else {
@@ -348,7 +350,7 @@ void read_file(string file_name) {
                 //前十块一定是读完一整块
                 vD.readBlock(addr, &temp_text);
                 cout << temp_text;
-                memset(temp_text, '\0', sizeof(temp_text)) //清空
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
 
             unsigned int temp_addr[BLOCKSIZ / 4];
@@ -366,7 +368,7 @@ void read_file(string file_name) {
                     temp_text[last_size] = '\0';
                 }
                 cout << temp_text;
-                memset(temp_text, '\0', sizeof(temp_text)) //清空
+                memset(temp_text, '\0', sizeof(temp_text)); //清空
             }
         }
 
@@ -406,7 +408,11 @@ void delete_file(string file_name) {
             cur_dir.dir[i] = cur_dir.dir[i + 1];
         }
         cur_dir.size--;
-        get_cur_dir();
+
+
+        //更新 map
+        // !!! ???? 这里要怎么做哦?
+        //update_cur_dir_map();
 
         //在系统打开表和用户打开表中删除该项
         if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {
@@ -443,7 +449,7 @@ void delete_file(string file_name) {
 
             //释放inode
             iput(file_inode->i_ino);
-            ifree(file_inode);
+            ifree(file_inode->i_ino);
 
             // cd切换目录时更新即可
 
@@ -496,7 +502,8 @@ void close_file(string file_name) {
     }
 }
 
-void write_f(string file_name, void *file_context, int size, unsigned int inode_number) {
+void write_f(string file_name, void *file_context, int size,
+             unsigned int inode_number) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
 
     struct inode *file_inode;

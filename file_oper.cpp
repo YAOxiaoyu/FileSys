@@ -12,7 +12,7 @@ void open_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -71,7 +71,7 @@ void create_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -142,13 +142,14 @@ void create_file(string file_name) {
 }
 
 void write_file(string file_name) {
+    
 
     //在当前目录表中查找此文件
     int file_inode_no;
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -286,12 +287,19 @@ void write_file(string file_name) {
 
 void read_file(string file_name) {
 
+    //TODO 多级目录正则
+    //保存当前目录名
+    // string cur_path;
+    // cur_path.assign(cur_dir.dir[1].d_name);
+    //解析file_name
+
+
     //在当前目录表中查找此文件
     int file_inode_no;
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -335,7 +343,6 @@ void read_file(string file_name) {
             }
             cout << "#" << endl;
         } else {
-            //从上面抄下来的,记得一起改
             for (int i = 0; i < 10; i++) {
                 unsigned int addr = file_inode->di_addr[i];
                 char temp_text[BLOCKSIZ];
@@ -352,7 +359,6 @@ void read_file(string file_name) {
             for (int i = 0; i < block_num - 10; i++) {
                 unsigned int addr = temp_addr[i];
 
-                //从上面抄下来的,记得一起改
                 char temp_text[BLOCKSIZ];
 
                 vD.readBlock(addr, &temp_text);
@@ -362,6 +368,7 @@ void read_file(string file_name) {
                     temp_text[last_size] = '\0';
                 }
                 cout << temp_text;
+                memset(temp_text, '\0', sizeof(temp_text)) //清空
             }
         }
 
@@ -377,7 +384,7 @@ void delete_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -455,7 +462,7 @@ void close_file(string file_name) {
     int dir_item_no;
     for (int i = 0; i < cur_dir.size; i++) {
         string temp_name;
-        temp_name.assign(cur_dir.dir[i]);
+        temp_name.assign(cur_dir.dir[i].d_name);
         if (temp_name == file_name && iget(cur_dir.dir[i].d_ino)->i_flag != 0) {
             //存在且不是一个目录
             file_inode_no = cur_dir.dir[i].d_ino;
@@ -493,6 +500,14 @@ void close_file(string file_name) {
 
 void write_f(string file_name, void *file_context, int size) {
     //鉴于这是文件系统调用的,那么就说明一切应该正常,当前dir_list中应该会有此文件
+
+    /a/b/c/
+    /password
+    cd("..");
+    cd(..)
+    cd (..)
+    write_f(password)
+    write_f(/password)
 
     struct inode *file_inode = iget(dir_list.find(file_name));
 
@@ -573,7 +588,6 @@ void read_f(string file_name, void *file_context, int size) {
             //假如文件只有500KB,但读出的是512KB,但实际是知道文件的大小是500KB的,所以只需这样读就可以了?
         }
     } else {
-        //从上面抄下来的,记得一起改
         for (int i = 0; i < 10; i++) {
             unsigned int addr = file_inode->di_addr[i];
             vD.readBlock(addr, file_context + i * BLOCKSIZ);

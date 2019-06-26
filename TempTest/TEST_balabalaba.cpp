@@ -4,10 +4,17 @@
 
 using namespace std;
 
-void test(void *p, int size) {
+char stor[100];
+
+void read_(void *p, int size) {
     for (int i = 0; i < size; i++) {
-        *(char*)p = 'a';
-        p++;
+        *((char *)p + i) = *(stor + i);
+    }
+}
+
+void write_(void *p, int size) {
+    for (int i = 0; i < size; i++) {
+        *(stor + i) = *((char *)p + i);
     }
 }
 
@@ -17,20 +24,16 @@ int main() {
     strcpy(s, ss.c_str());
     cout << s;
 
-    char a[10] = "abcde";
+    char aa[10] = "abcde";
     string sss;
-    sss.assign(a);
+    sss.assign(aa);
     cout << sss;
-
-    char b[10] = "abc\0d";
     cout << endl;
+
+    int a = 4, b;
+    write_(&a, sizeof(a));
+    read_(&b, sizeof(b));
     cout << b << endl;
-
-    char c[10];
-    test(&c, 10);
-    cout << c << endl;
-
-    
 }
 
 //备份一下

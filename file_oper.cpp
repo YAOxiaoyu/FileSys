@@ -127,8 +127,7 @@ void create_file(string file_name) {
         cur_dir.dir[cur_dir.size - 1] = temp_dir;
 
         // 3. 更新当前dir_map
-        // !!! 什么意思???? 下面这一行
-        // get_cur_dir();
+        get_cur_dir(0);
 
         // iput时写回inode即可
 
@@ -411,8 +410,7 @@ void delete_file(string file_name) {
 
 
         //更新 map
-        // !!! ???? 这里要怎么做哦?
-        //update_cur_dir_map();
+        get_cur_dir(0);
 
         //在系统打开表和用户打开表中删除该项
         if (inode_sys_o.find(file_inode->i_ino) != inode_sys_o.end()) {

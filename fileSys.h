@@ -71,8 +71,8 @@ struct inode {
     unsigned int di_addr[10]; //物理块号
 
     //三级索引
-    unsigned int first_index_addr; // 512/4 * 512 = 2^7 * 2^9 = 64KB
-                                   // (文件最多10+128=138块)
+    unsigned int first_index_addr;  // 512/4 * 512 = 2^7 * 2^9 = 64KB
+                                    // (文件最多10+128=138块)
     unsigned int second_index_addr; //(512/4)^2 * 512 = 2^14 * 2*9 = 8MB
     unsigned int third_index_addr;  //(512/4)^3 * 512 = 2^14 * 2*9 = 1G
 };
@@ -87,8 +87,8 @@ struct dinode {
     unsigned int di_addr[10]; //物理块号
 
     //三级索引
-    unsigned int first_index_addr; // 512/4 * 512 = 2^7 * 2^9 = 64KB
-                                   // (文件最多10+128=138块)
+    unsigned int first_index_addr;  // 512/4 * 512 = 2^7 * 2^9 = 64KB
+                                    // (文件最多10+128=138块)
     unsigned int second_index_addr; //(512/4)^2 * 512 = 2^14 * 2*9 = 8MB
     unsigned int third_index_addr;  //(512/4)^3 * 512 = 2^14 * 2*9 = 1G
 };
@@ -143,8 +143,8 @@ extern unsigned int home_ino;  //根目录的inode
 extern string cur_dir_name;
 
 //文件打开表
-extern map<unsigned int, struct inode> inode_o;       // inode打开表
-extern map<string, unsigned int> dir_list;            //当前目录表
+extern map<unsigned int, struct inode> inode_o; // inode打开表
+extern map<string, unsigned int> dir_list;      //当前目录表
 
 extern map<unsigned int, struct inode *> inode_sys_o; // inode 系统打开表
 extern map<unsigned int, struct inode *>
@@ -157,8 +157,7 @@ void format();
 unsigned int balloc();              //磁盘块分配函数
 void bfree(unsigned int block_num); //磁盘块释放函数
 
-void get_cur_dir(unsigned int,
-                 int); //获取当前文件的目录表          //获取当前目录
+void get_cur_dir(int output); //获取当前文件的目录表          //获取当前目录
 
 void mkdir(string new_name); //当前目录下创建新文件夹
 void get_dir(string path);   // 多级目录
@@ -178,7 +177,7 @@ void delete_file(string file_name);
 void close_file(string file_name);
 
 void write_f(string, void *, int, unsigned int);
-unsigned int read_f(string , void *,unsigned int);
+unsigned int read_f(string, void *, unsigned int);
 
 void close_sys();
 

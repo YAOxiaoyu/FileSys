@@ -29,9 +29,9 @@ using namespace std;
 int main(){
     fstream file;
     file.open(virtualDName,ios::in);
-    // if(!file){
-    //     vD.newDisk(ALLBLOCKNUM*BLOCKSIZ);
-    //     format(vD);
-    // }
+    if(!file){
+        vD.newDisk(ALLBLOCKNUM*BLOCKSIZ);
+        format(vD);
+    }
     return 0;
 }

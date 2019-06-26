@@ -53,7 +53,7 @@ unsigned int balloc() {
             struct super_block temp_block;
             vD.readBlock(super_block.s_free[super_block.s_pfree], &temp_block);
             for (int i = 0; i < NICFREE; i++) {
-                super_block.s_nfree[i] = temp_block.s_nfree[i];
+                super_block.s_free[i] = temp_block.s_free[i];
             }
 
             super_block.s_pfree = NICFREE - 1;

@@ -137,8 +137,7 @@ extern unsigned int home_ino;  //根目录的inode
 extern map<unsigned int, struct inode> inode_o;       // inode打开表
 extern map<string, unsigned int> dir_list;            //当前目录表
 extern map<unsigned int, struct inode *> inode_sys_o; // inode 系统打开表
-extern map<unsigned int, struct inode *>
-    inode_user_o; // inode 打开表(用户文件打开表)
+extern map<unsigned int, struct inode *> inode_user_o; // inode 打开表(用户文件打开表)
 // TODO 切换用户时,文件打开表怎么办?
 
 // 函数声明
